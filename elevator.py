@@ -14,7 +14,7 @@ class Elevator(object):
         # current number of passengers on the elevator
         self.curr_capacity = 0
         # total cost incurred so far
-        self.cummulative_cost = 0
+        self.cumulative_cost = 0
 
     def move(self, action):
         if action == 0:
@@ -32,15 +32,20 @@ class Elevator(object):
         """
         Load the passengers
         """
-        for p in floor.passenger_list:
+        del_list = [] # idices of passenger objects to remove
+        for i, p in enumerate(floor.passenger_list):
             if self.curr_capacity >= MAX_CAP_ELEVATOR:
-                pass
+                break
             if p.destination not in self.dict_passengers.keys():
                 self.dict_passengers[p.destination] = [p]
             else:
                 self.dict_passengers[p.destination].append(p)
+            del_list.append(i)
             self.curr_capacity += 1
-            self.cummulative_cost += p.time
+            self.cumulative_cost += p.time
+        for idx in del_list:
+            floor.passenger_list.pop(idx)
+        return floor
 
     def unload(self, floor):
         """
@@ -49,7 +54,7 @@ class Elevator(object):
         if floor.value in self.dict_passengers.keys():
             cost = sum([x.time for x in self.dict_passengers[floor.value]])
             self.dict_passengers.pop(floor.value, None)
-            self.cummulative_cost -= cost
+            self.cumulative_cost -= cost
 
     def update(self):
         """
@@ -64,7 +69,4 @@ class Elevator(object):
                 self.curr_floor -= 1
 
         # Update the cost
-        self.cummulative_cost += self.curr_capacity
-
-
-
+        self.cumulative_cost += self.curr_capacity

@@ -1,0 +1,2 @@
+1. step function (environment.py) : take in action from controller, return vectorizes state and reward
+2. controller NN 
