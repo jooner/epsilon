@@ -17,8 +17,9 @@ class Environment(object):
             for passenger in floor.passenger_list:
                 passenger.time += 1
         for elevator in self.building.elevators:
-            for passenger in elevator.values():
-                passenger.time += 1
+            for k, v in elevator.dict_passengers.iteritems():
+                for passenger in v:
+                    passenger.time += 1
 
     def step(self, a):
         """
@@ -31,6 +32,8 @@ class Environment(object):
                 flr = self.building.elevators[i].curr_floor
                 self.building.elevators[i].unload(self.building.floors[flr])
                 self.building.floors[flr] = self.building.elevators[i].load(self.building.floors[flr])
+
+            print elevator_action
             self.building.elevators[i].move(elevator_action)
             self.building.elevators[i].update()
         self.tic() # progress global time by t += 1
@@ -44,11 +47,11 @@ class Environment(object):
     def get_state(self):
         state = np.zeros(NUM_FLOORS * 2 + NUM_ELEVATORS * 3)
         idx = 0
-        for floor in self.buildings.floors:
-            state[idx:idx+1] = floor.call
+        for floor in self.building.floors:
+            state[idx:idx+2] = floor.call
             idx += 2
-        for elevator in self.buildings.elevators:
-            state[idx:idx+2] = [elevator.curr_floor, elevator.move_direction, elevator.curr_capacity]
+        for elevator in self.building.elevators:
+            state[idx:idx+3] = [elevator.curr_floor, elevator.move_direction, elevator.curr_capacity]
             idx += 3
         return state
 

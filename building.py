@@ -20,7 +20,7 @@ class Floor(object):
         self.call = [0,0] # [is_up, is_down]
 
     def update_call(self):
-        for passenger in passenger_list:
+        for passenger in self.passenger_list:
             diff = passenger.start_floor - passenger.destination
             if diff > 0:
                 self.call[1] = 1
@@ -30,7 +30,7 @@ class Floor(object):
                 pass
 
     def get_cost(self):
-        return sum([p.time for p in passenger_list])
+        return sum([p.time for p in self.passenger_list])
 
 class Elevator(object):
     def __init__(self):
