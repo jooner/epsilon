@@ -87,13 +87,16 @@ class Elevator(object):
         """
         Given Floor object, unload the passengers
         """
+        total_time = []
         if floor.value in self.dict_passengers.keys():
             for x in self.dict_passengers[floor.value]:
                 self.cumulative_cost -= x.time
                 self.curr_capacity -= 1
+                total_time.append(x.time)
             self.dict_passengers.pop(floor.value, None)
 
-
+        #print total_time
+        return total_time
 
     def update(self):
         """

@@ -11,6 +11,7 @@ class Environment(object):
         self.total_pop = 0
         self.curr_pop = 0
         self.building = building
+        self.global_time_list = []
 
     def tic(self): # long live ke$ha
         for floor in self.building.floors:
@@ -30,10 +31,10 @@ class Environment(object):
         for i, elevator_action in enumerate(a):
             if elevator_action == 0:
                 flr = self.building.elevators[i].curr_floor
-                self.building.elevators[i].unload(self.building.floors[flr])
+                self.global_time_list.extend(self.building.elevators[i].unload(self.building.floors[flr]))
                 self.building.floors[flr] = self.building.elevators[i].load(self.building.floors[flr])
 
-            print elevator_action
+            #print elevator_action
             self.building.elevators[i].move(elevator_action)
             self.building.elevators[i].update()
         self.tic() # progress global time by t += 1
@@ -67,3 +68,12 @@ class Environment(object):
                                                range(passenger.start_floor + 1, NUM_FLOORS))
                 self.building.floors[passenger.start_floor].passenger_list.append(passenger)
                 self.building.floors[passenger.start_floor].update_call()
+
+    def update_globaL_time_list(self):
+        for floor in self.building.floors:
+            for p in floor.passenger_list:
+                self.global_time_list.append(p.time)
+        for elev in self.building.elevators:
+            for k,v in elev.dict_passengers.iteritems():
+                for p in v:
+                    self.global_time_list.append(p.time)

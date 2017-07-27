@@ -10,7 +10,6 @@ occurs in practice.
 
 """
 from __future__ import absolute_import
-from __future__ import print_function
 
 from environment import Environment
 from building import Building
@@ -18,7 +17,7 @@ from globals import *
 
 import numpy as np
 
-NUM_EPOCHS = 100
+NUM_EPOCHS = 1
 
 
 def lqf_controller(env):
@@ -41,24 +40,31 @@ def lqf_controller(env):
 
 
 def game_over(env):
-    return (env.total_pop > MAX_POPULATION)
+    return (env.total_pop >= MAX_POPULATION)
 
-def run(lqf_env, epoch=1):
-    scores = []
-    for _ in range(epoch):
+def run(epoch=1):
+    #scores = []
+    for i in range(epoch):
+        lqf_building = Building()
+        lqf_env = Environment(lqf_building)
+        #print "---------------------%d"%i
+
         while not game_over(lqf_env):
+            #print lqf_env.total_pop
             lqf_env.populate() # populate the building
             lqf_env.tic() # t += 1
             action = lqf_controller(lqf_env)
-            lqf_env.step(action)
-        scores.append(lqf_env.get_reward())
+            s, r = lqf_env.step(action)
+            #print "action = %s \t reward = %f"%(action, r)
+        #scores.append(lqf_env.get_reward())
+        lqf_env.update_globaL_time_list()
+        avg_time = sum(lqf_env.global_time_list) / float(lqf_env.total_pop)
+    return avg_time
     # average performance over epochs
-    return sum(scores) / len(scores)
+    # return sum(scores) / len(scores)
 
 def main():
-    lqf_building = Building()
-    lqf_env = Environment(lqf_building)
-    average_score = run(lqf_env, epoch=NUM_EPOCHS)
+    average_score = run(epoch=NUM_EPOCHS)
     print("Average Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
 
 if __name__ == "__main__":
