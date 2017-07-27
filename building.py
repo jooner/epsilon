@@ -29,6 +29,9 @@ class Floor(object):
             else:
                 pass
 
+    def get_cost(self):
+        return sum([p.time for p in passenger_list])
+
 class Elevator(object):
     def __init__(self):
         # dictionary of passengers (key: destination floor, value: passenger object)

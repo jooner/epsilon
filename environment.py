@@ -32,9 +32,13 @@ class Environment(object):
                 self.building.floors[flr] = self.building.elevators[i].load(self.building.floors[flr])
             self.building.elevators[i].move(elevator_action)
             self.building.elevators[i].update()
-        reward = -sum([x.cumulative_cost for x in self.building.elevators])
         self.tic() # progress global time by t += 1
-        return (self.get_state, reward)
+        return (self.get_state(), self.get_reward())
+
+    def get_reward(self):
+        reward = -sum([e.cumulative_cost for e in self.building.elevators])
+        reward -= sum([f.get_cost() for f in self.building.floors])
+        return reward
 
     def get_state(self):
         state = np.zeros(NUM_FLOORS * 2 + NUM_ELEVATORS * 3)
