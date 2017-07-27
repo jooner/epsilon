@@ -35,6 +35,8 @@ def lqf_controller(env):
             is_downcall = env.building.floors[elevator.curr_floor].call[1]
             if (is_upcall == elevator.move_direction) or (is_downcall == -elevator.move_direction):
                 action[i] = 0
+            else:
+                action[i] = elevator.move_direction
     return action
 
 

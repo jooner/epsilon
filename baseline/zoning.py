@@ -16,7 +16,7 @@ class Elevator_Z(Elevator):
         pass
 
 def _partition(lst, n):
-    # partition a lst into n approximately-equally-sized lists
+    # Helper function: partition a lst into n approximately-equally-sized lists
     division = len(lst) / float(n)
     return np.asarray([ lst[int(round(division * i)): int(round(division * (i + 1)))] for i in xrange(n) ])
 
@@ -29,7 +29,7 @@ def divide_random_zones():
     floors = list(np.random.permutation(NUM_FLOORS))
     return _partition(floors, NUM_ELEVATORS)
 
-if __name__ == '__main__':
+def main():
     zones = divide_random_zones()
     for z in zones:
         z.sort()
@@ -37,5 +37,6 @@ if __name__ == '__main__':
     for i, e in enumerate(building.elevators):
         e = Elevator_Z(i, zones)
         e = zones[i][len(zones)/2]
-    print "hello"
 
+if __name__ == '__main__':
+    main()

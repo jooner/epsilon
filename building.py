@@ -72,8 +72,11 @@ class Elevator(object):
             del_list.append(i)
             self.curr_capacity += 1
             self.cumulative_cost += p.time
-        for idx in del_list:
-            floor.passenger_list.pop(idx)
+        temp = []
+        for i in xrange(len(floor.passenger_list)):
+            if i not in del_list:
+                temp.append(floor.passenger_list[i])
+        floor.passenger_list = temp
         # reinitialize floor calls
         floor.call = [0,0]
         floor.update_call()
