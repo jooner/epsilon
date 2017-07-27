@@ -11,12 +11,41 @@ class Environment(object):
         self.curr_pop = 0
         self.building = building
 
+    def tic(self): # long live ke$ha
+        for floor in self.building.floors:
+            for passenger in floor.passenger_list:
+                passenger.time += 1
+        for elevator inself.building.elevators:
+            for passenger in elevator.values():
+                passenger.time += 1
+
     def step(self, a):
         """
-        Input: action
+        Input: action [E1, E2, E3] where En is one of 1,0,-1
         Returns: next state and reward
         """
-        pass
+        assert len(a) == len(self.building.elevators)
+        for i, elevator_action in enumerate(a):
+            if elevator_action == 0:
+                flr = self.building.elevators[i].curr_floor
+                self.building.elevators[i].unload(self.building.floors[flr])
+                self.building.floors[flr] = self.building.elevators[i].load(self.building.floors[flr])
+            self.building.elevators[i].move(elevator_action)
+            self.building.elevators[i].update()
+        reward = -sum([x.cumulative_cost for x in self.building.elevators])
+        self.tic() # progress global time by t += 1
+        return (self.get_state, reward)
+
+    def get_state(self):
+        state = np.zeros(NUM_FLOORS * 2 + NUM_ELEVATORS * 3)
+        idx = 0
+        for floor in self.buildings.floors:
+            state[idx:idx+1] = floor.call
+            idx += 2
+        for elevator in self.buildings.elevators:
+            state[idx:idx+2] = [elevator.curr_floor, elevator.move_direction, elevator.curr_capacity]
+            idx += 3
+        return state
 
     def populate(self):
         """Populate passenger objects"""
