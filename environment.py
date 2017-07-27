@@ -2,6 +2,7 @@ import numpy as np
 
 from random import randint, choice
 from globals import *
+from passenger import *
 
 
 class Environment(object):
@@ -15,7 +16,7 @@ class Environment(object):
         for floor in self.building.floors:
             for passenger in floor.passenger_list:
                 passenger.time += 1
-        for elevator inself.building.elevators:
+        for elevator in self.building.elevators:
             for passenger in elevator.values():
                 passenger.time += 1
 
@@ -59,7 +60,7 @@ class Environment(object):
             self.total_pop += new_pop
             for _ in xrange(new_pop):
                 passenger = Passenger()
-                passenger.destination = choice(range(0, self.start_floor) +
-                                               range(self.start_floor + 1, NUM_FLOORS))
+                passenger.destination = choice(range(0, passenger.start_floor) +
+                                               range(passenger.start_floor + 1, NUM_FLOORS))
                 self.building.floors[passenger.start_floor].passenger_list.append(passenger)
                 self.building.floors[passenger.start_floor].update_call()

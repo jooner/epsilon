@@ -1,5 +1,5 @@
 from random import randint
-from gloabals import *
+from globals import *
 
 import numpy as np
 
