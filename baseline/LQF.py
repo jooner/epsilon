@@ -30,6 +30,8 @@ def lqf_controller(env):
             priority_flr = priority_q[min(priority_q.keys())]
             action[i] = np.sign(priority_flr - elevator.curr_floor)
         else: # elevator is moving
+            ## NOTE: Doesn't consider when to stop for loading -- only considers when to 
+            ## stop for unloading.
             is_upcall = env.building.floors[elevator.curr_floor].call[0]
             is_downcall = env.building.floors[elevator.curr_floor].call[1]
             if (is_upcall == elevator.move_direction) or (is_downcall == -elevator.move_direction):
@@ -57,7 +59,7 @@ def run(epoch=1):
             s, r = lqf_env.step(action)
             #print "action = %s \t reward = %f"%(action, r)
         #scores.append(lqf_env.get_reward())
-        lqf_env.update_globaL_time_list()
+        lqf_env.update_global_time_list()
         avg_time = sum(lqf_env.global_time_list) / float(lqf_env.total_pop)
     return avg_time
     # average performance over epochs

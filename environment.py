@@ -69,7 +69,7 @@ class Environment(object):
                 self.building.floors[passenger.start_floor].passenger_list.append(passenger)
                 self.building.floors[passenger.start_floor].update_call()
 
-    def update_globaL_time_list(self):
+    def update_global_time_list(self):
         for floor in self.building.floors:
             for p in floor.passenger_list:
                 self.global_time_list.append(p.time)
