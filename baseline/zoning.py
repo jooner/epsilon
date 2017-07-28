@@ -149,7 +149,7 @@ def zoning_controller(env):
                 action[i] = np.sign(f_load - elevator.curr_floor)
     return action
 
-def run(epoch=1, zone_type="random"):
+def zoning_run(epoch=1, zone_type="random"):
     result = 0
     for i in range(epoch):
         if zone_type == "random":
@@ -174,9 +174,9 @@ def run(epoch=1, zone_type="random"):
         result += avg_time
     return result / float(epoch)
 
-def main():
-    average_score = run(epoch=NUM_EPOCHS)
+def zoning_main():
+    average_score = zoning_run(epoch=NUM_EPOCHS)
     print("Average Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
 
 if __name__ == '__main__':
-    main()
+    zoning_main()

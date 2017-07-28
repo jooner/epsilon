@@ -44,7 +44,7 @@ def lqf_controller(env):
 def game_over(env):
     return (env.total_pop >= MAX_POPULATION)
 
-def run(epoch=1):
+def lqf_run(epoch=1):
     #scores = []
     for i in range(epoch):
         lqf_building = Building()
@@ -65,9 +65,9 @@ def run(epoch=1):
     # average performance over epochs
     # return sum(scores) / len(scores)
 
-def main():
-    average_score = run(epoch=NUM_EPOCHS)
+def lqf_main():
+    average_score = lqf_run(epoch=NUM_EPOCHS)
     print("Average Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
 
 if __name__ == "__main__":
-    main()
+    lqf_main()
