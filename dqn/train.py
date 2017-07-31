@@ -1,4 +1,5 @@
 from dqn import *
+from collections import namedtuple
 
 VALID_ACTIONS = [-1, 0, 1]
 
@@ -66,6 +67,8 @@ def deep_q_learning(sess,
                     epsilon_decay_steps=500000,
                     batch_size=32,
                     record_video_every=50):
+    
+    EpisodeStats = namedtuple("Stats",["episode_lengths", "episode_rewards"])
     """
     Q-Learning algorithm for fff-policy TD control using Function Approximation.
     Finds the optimal greedy policy while following an epsilon-greedy policy.
@@ -100,7 +103,7 @@ def deep_q_learning(sess,
     replay_memory = []
 
     # Keeps track of useful statistics
-    stats = plotting.EpisodeStats(
+    stats = EpisodeStats(
         episode_lengths=np.zeros(num_episodes),
         episode_rewards=np.zeros(num_episodes))
 
@@ -240,7 +243,7 @@ def deep_q_learning(sess,
         q_estimator.summary_writer.add_summary(episode_summary, total_t)
         q_estimator.summary_writer.flush()
 
-        yield total_t, plotting.EpisodeStats(
+        yield total_t, EpisodeStats(
             episode_lengths=stats.episode_lengths[:i_episode+1],
             episode_rewards=stats.episode_rewards[:i_episode+1]), avg_time
 

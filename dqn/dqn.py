@@ -9,9 +9,8 @@ import tensorflow as tf
 if "../" not in sys.path:
   sys.path.append("../")
 
-from epsilon import globals
-
 from lib import plotting
+
 from collections import deque, namedtuple
 
 class Estimator():
