@@ -1,7 +1,7 @@
 from dqn import *
-from globals import *
-from building import *
-from environment import *
+from epsilon.globals import *
+from epsilon.building import *
+from epsilon.environment import *
 import tensorflow as tf
 import datetime, time
 from train import *

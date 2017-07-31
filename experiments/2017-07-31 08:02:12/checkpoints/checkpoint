@@ -1,0 +1,2 @@
+model_checkpoint_path: "/workspace/epsilon/experiments/2017-07-31 08:02:12/checkpoints/model"
+all_model_checkpoint_paths: "/workspace/epsilon/experiments/2017-07-31 08:02:12/checkpoints/model"
