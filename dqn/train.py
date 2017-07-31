@@ -243,7 +243,7 @@ def deep_q_learning(sess,
         q_estimator.summary_writer.add_summary(episode_summary, total_t)
         q_estimator.summary_writer.flush()
 
-        yield total_t, EpisodeStats(
+        yield total_t, i_episode, EpisodeStats(
             episode_lengths=stats.episode_lengths[:i_episode+1],
             episode_rewards=stats.episode_rewards[:i_episode+1]), avg_time
 

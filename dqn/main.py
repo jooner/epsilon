@@ -28,7 +28,7 @@ target_estimator = Estimator(s_dim, a_dim, scope="target_q")
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    for t, stats, avg_t in deep_q_learning(sess,
+    for t, num_ep, stats, avg_t in deep_q_learning(sess,
                                     env,
                                     q_estimator=q_estimator,
                                     target_estimator=target_estimator,
@@ -43,4 +43,4 @@ with tf.Session() as sess:
                                     discount_factor=0.99,
                                     batch_size=32):
 
-        print "Episode Reward: {}\t Episode AvgWaitTime: {}".format(stats.episode_rewards[-1], avg_t)
+        print "Episode {}\t  Reward: {}\t Episode AvgWaitTime: {}".format(num_ep, stats.episode_rewards[-1], avg_t)
