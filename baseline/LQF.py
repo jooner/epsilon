@@ -55,7 +55,7 @@ def lqf_run(epoch=1):
             lqf_env.populate() # populate the building
             lqf_env.tic() # t += 1
             action = lqf_controller(lqf_env)
-            s, r = lqf_env.step(action)
+            s, r, _ = lqf_env.step(action)
             #print "action = %s \t reward = %f"%(action, r)
         #scores.append(lqf_env.get_reward())
         lqf_env.update_global_time_list()

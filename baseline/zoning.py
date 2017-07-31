@@ -168,7 +168,7 @@ def zoning_run(epoch=1, zone_type="random"):
             zoning_env.populate()
             zoning_env.tic()
             action = zoning_controller(zoning_env)
-            s, r = zoning_env.step(action)
+            s, r, _ = zoning_env.step(action)
         zoning_env.update_global_time_list()
         avg_time = sum(zoning_env.global_time_list) /float(zoning_env.total_pop)
         result += avg_time

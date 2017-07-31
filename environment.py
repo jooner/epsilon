@@ -3,7 +3,7 @@ import numpy as np
 from random import randint, choice
 from globals import *
 from passenger import *
-
+from building import *
 
 class Environment(object):
     def __init__(self, building):
@@ -38,7 +38,10 @@ class Environment(object):
             self.building.elevators[i].move(elevator_action)
             self.building.elevators[i].update()
         self.tic() # progress global time by t += 1
-        return (self.get_state(), self.get_reward())
+        done = False
+        if self.curr_pop == MAX_POPULATION:
+            done = True
+        return (self.get_state(), self.get_reward(), done)
 
     def get_reward(self):
         reward = -sum([e.cumulative_cost for e in self.building.elevators])
@@ -77,3 +80,8 @@ class Environment(object):
             for k,v in elev.dict_passengers.iteritems():
                 for p in v:
                     self.global_time_list.append(p.time)
+
+    def reset(self):
+        building = Building()
+        self.__init__(building)
+        return self.get_state()
