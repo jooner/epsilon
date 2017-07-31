@@ -40,10 +40,9 @@ def make_epsilon_greedy_policy(estimator, nA):
     def policy_fn(sess, observation, epsilon):
         A = np.ones(nA, dtype=float) * epsilon / nA
         q_values = estimator.predict(sess, np.expand_dims(observation, 0))
-        best_action =
-        tf.constant([tf.argmax(q_values[:3]) -1,
-                                   tf.argmax(q_values[3:6]) -1,
-                                   tf.argmax(q_values[6:]) -1], dtype=tf.float32)
+        #best_action = tf.Variable([tf.argmax(q_values[:3]) -1,
+        #                           tf.argmax(q_values[3:6]) -1,
+        #                           tf.argmax(q_values[6:]) -1])
         # np.argmax(q_values)
         for i in range(NUM_ELEVATORS):
             i *= NUM_ELEVATORS
@@ -135,12 +134,14 @@ def deep_q_learning(sess,
     # Populate the replay memory with initial experience
     print "Populating replay memory..."
     state = env.reset()
-    for i in range(replay_memory_init_size):
+    for _ in range(replay_memory_init_size):
         action_probs = policy(sess, state, epsilons[min(total_t, epsilon_decay_steps-1)])
         action = []
         for i in range(NUM_ELEVATORS):
             i *= 3
-            act = np.random.choice(np.arange(len(VALID_ACTIONS)), p=action_probs[i:i+3]) - 1
+            ss = action_probs[i:i+3].sum(axis=0)
+            act_p = action_probs[i:i+3] / ss
+            act = np.random.choice(np.arange(NUM_VALID_ACTIONS), p=act_p) - 1
             action.append(act)
         next_state, reward, done = env.step(action)
 
@@ -173,18 +174,24 @@ def deep_q_learning(sess,
             # Maybe update the target estimator
             if total_t % update_target_estimator_every == 0:
                 copy_model_parameters(sess, q_estimator, target_estimator)
-                print "Copied model parameters to target network."
+            #    print "Copied model parameters to target network."
 
             # Print out which step we're on, useful for debugging.
-            print "Step {} ({}) @ Episode {}/{}, loss: {}".format(t, total_t, i_episode + 1, num_episodes, loss)
-            sys.stdout.flush()
+            #print "Step {} ({}) @ Episode {}/{}, loss: {}".format(t, total_t, i_episode + 1, num_episodes, loss)
+            #sys.stdout.flush()
+
+            # Populate the environment
+            env.populate()
+            env.tic()
 
             # Take a step
             action_probs = policy(sess, state, epsilon)
             action = []
             for i in range(NUM_ELEVATORS):
                 i *= 3
-                act = np.random.choice(np.arange(len(VALID_ACTIONS)), p=action_probs[i:i+3]) - 1
+                ss = action_probs[i:i+3].sum(axis=0)
+                act_p = action_probs[i:i+3] / ss
+                act = np.random.choice(np.arange(NUM_VALID_ACTIONS), p=act_p) - 1
                 action.append(act)
             #action_probs = policy(sess, state, epsilon)
             #action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
@@ -222,15 +229,19 @@ def deep_q_learning(sess,
             state = next_state
             total_t += 1
 
+        env.update_global_time_list()
+        avg_time = sum(env.global_time_list) / float(env.total_pop)
+
         # Add summaries to tensorboard
         episode_summary = tf.Summary()
         episode_summary.value.add(simple_value=stats.episode_rewards[i_episode], node_name="episode_reward", tag="episode_reward")
         episode_summary.value.add(simple_value=stats.episode_lengths[i_episode], node_name="episode_length", tag="episode_length")
+        episode_summary.value.add(simple_value=avg_time, node_name="average_wait", tag="average_wait")
         q_estimator.summary_writer.add_summary(episode_summary, total_t)
         q_estimator.summary_writer.flush()
 
         yield total_t, plotting.EpisodeStats(
             episode_lengths=stats.episode_lengths[:i_episode+1],
-            episode_rewards=stats.episode_rewards[:i_episode+1])
+            episode_rewards=stats.episode_rewards[:i_episode+1]), avg_time
 
     return

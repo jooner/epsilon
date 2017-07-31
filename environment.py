@@ -39,7 +39,7 @@ class Environment(object):
             self.building.elevators[i].update()
         self.tic() # progress global time by t += 1
         done = False
-        if self.curr_pop == MAX_POPULATION:
+        if self.curr_pop >= MAX_POPULATION:
             done = True
         return (self.get_state(), self.get_reward(), done)
 
