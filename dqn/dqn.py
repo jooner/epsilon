@@ -4,10 +4,12 @@ import os
 import random
 import sys
 import tensorflow as tf
-from globals import *
+
 
 if "../" not in sys.path:
   sys.path.append("../")
+
+from epsilon import globals
 
 from lib import plotting
 from collections import deque, namedtuple
