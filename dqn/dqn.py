@@ -9,7 +9,7 @@ from globals import *
 if "../" not in sys.path:
   sys.path.append("../")
 
-from lib import plotting
+#from lib import plotting
 from collections import deque, namedtuple
 
 class Estimator():
