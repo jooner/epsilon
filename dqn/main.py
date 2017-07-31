@@ -20,7 +20,7 @@ experiment_dir = os.path.abspath("./experiments/{}".format(st))
 global_step = tf.Variable(0, name='global_step', trainable=False)
 
 s_dim = len(env.get_state())
-a_dim = NUM_ELEVATORS
+a_dim = NUM_ELEVATORS # 3 possible actions per elevator
 
 # Create estimators
 q_estimator = Estimator(s_dim, a_dim, scope="q", summaries_dir=experiment_dir)
@@ -44,4 +44,3 @@ with tf.Session() as sess:
                                     batch_size=32):
 
         print("\nEpisode Reward: {}".format(stats.episode_rewards[-1]))
-

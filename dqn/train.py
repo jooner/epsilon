@@ -39,9 +39,15 @@ def make_epsilon_greedy_policy(estimator, nA):
     """
     def policy_fn(sess, observation, epsilon):
         A = np.ones(nA, dtype=float) * epsilon / nA
-        q_values = estimator.predict(sess, np.expand_dims(observation, 0))[0]
-        best_action = np.argmax(q_values)
-        A[best_action] += (1.0 - epsilon)
+        q_values = estimator.predict(sess, np.expand_dims(observation, 0))
+        best_action =
+        tf.constant([tf.argmax(q_values[:3]) -1,
+                                   tf.argmax(q_values[3:6]) -1,
+                                   tf.argmax(q_values[6:]) -1], dtype=tf.float32)
+        # np.argmax(q_values)
+        for i in range(NUM_ELEVATORS):
+            i *= NUM_ELEVATORS
+            A[i:i+len(VALID_ACTIONS)][np.argmax(A[i:i+len(VALID_ACTIONS)])] += (1.0 - epsilon)
         return A
     return policy_fn
 
@@ -73,9 +79,9 @@ def deep_q_learning(sess,
         num_episodes: Number of episodes to run for
         experiment_dir: Directory to save Tensorflow summaries in
         replay_memory_size: Size of the replay memory
-        replay_memory_init_size: Number of random experiences to sampel when initializing 
+        replay_memory_init_size: Number of random experiences to sampel when initializing
           the reply memory.
-        update_target_estimator_every: Copy parameters from the Q estimator to the 
+        update_target_estimator_every: Copy parameters from the Q estimator to the
           target estimator every N steps
         discount_factor: Lambda time discount factor
         epsilon_start: Chance to sample a random action when taking an action.
@@ -124,15 +130,20 @@ def deep_q_learning(sess,
     # The policy we're following
     policy = make_epsilon_greedy_policy(
         q_estimator,
-        len(VALID_ACTIONS))
+        NUM_ELEVATORS * len(VALID_ACTIONS))
 
     # Populate the replay memory with initial experience
     print "Populating replay memory..."
     state = env.reset()
     for i in range(replay_memory_init_size):
         action_probs = policy(sess, state, epsilons[min(total_t, epsilon_decay_steps-1)])
-        action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
-        next_state, reward, done = env.step(VALID_ACTIONS[action])
+        action = []
+        for i in range(NUM_ELEVATORS):
+            i *= 3
+            act = np.random.choice(np.arange(len(VALID_ACTIONS)), p=action_probs[i:i+3]) - 1
+            action.append(act)
+        next_state, reward, done = env.step(action)
+
         replay_memory.append(Transition(state, action, reward, next_state, done))
         if done:
             state = env.reset()
@@ -170,8 +181,14 @@ def deep_q_learning(sess,
 
             # Take a step
             action_probs = policy(sess, state, epsilon)
-            action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
-            next_state, reward, done = env.step(VALID_ACTIONS[action])
+            action = []
+            for i in range(NUM_ELEVATORS):
+                i *= 3
+                act = np.random.choice(np.arange(len(VALID_ACTIONS)), p=action_probs[i:i+3]) - 1
+                action.append(act)
+            #action_probs = policy(sess, state, epsilon)
+            #action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
+            next_state, reward, done = env.step(action)
 
             # If our replay memory is full, pop the first element
             if len(replay_memory) == replay_memory_size:

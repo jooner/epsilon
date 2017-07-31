@@ -13,7 +13,8 @@ from lib import plotting
 from collections import deque, namedtuple
 
 class Estimator():
-    """Q-Value Estimator neural network.
+    """
+    Q-Value Estimator neural network.
 
     This network is used for both the Q-Network and the Target Network.
     """
@@ -43,20 +44,24 @@ class Estimator():
         self.y_pl = tf.placeholder(shape=[None], dtype=tf.float32, name="y")
         # Integer id of which action was selected
         self.actions_pl = tf.placeholder(shape=[None], dtype=tf.int32, name="actions")
-
         batch_size = tf.shape(self.inputs)[0]
-
-        # Fully connected layers
+        score_pred = []
+        # Fully connected layers with RELU
         fc1 = tf.contrib.layers.fully_connected(self.inputs, 512)
-        #fc1 = tf.contrib.layers.fully_connected(fc1, 512)
-        self.predictions = tf.contrib.layers.fully_connected(fc1, self.a_dim)
+        fc2 = tf.contrib.layers.fully_connected(fc1, 512)
+        self.predictions = tf.contrib.layers.fully_connected(fc2, self.a_dim * 3)
+        index_gatherer = tf.range(NUM_ELEVATORS) * NUM_VALID_ACTIONS
+        for i in range(batch_size):
+            indices = index_gatherer + self.actions_pl[i,:] + 1
+            score_pred.append(tf.reduce_sum(tf.gather(tf.reshape(self.predictions, [-1]), indices)))
+        score_pred = tf.stack(score_pred)
 
         # Get the predictions for the chosen actions only
-        gather_indices = tf.range(batch_size) * tf.shape(self.predictions)[1] + self.actions_pl
-        self.action_predictions = tf.gather(tf.reshape(self.predictions, [-1]), gather_indices)
+        # gather_indices = tf.range(batch_size) * tf.shape(self.predictions)[1] + self.actions_pl
+        # self.action_predictions = tf.gather(tf.reshape(self.predictions, [-1]), gather_indices)
 
         # Calcualte the loss
-        self.losses = tf.squared_difference(self.y_pl, self.action_predictions)
+        self.losses = tf.squared_difference(self.y_pl, score_pred)
         self.loss = tf.reduce_mean(self.losses)
 
         # Optimizer Parameters from original paper
@@ -81,7 +86,7 @@ class Estimator():
           s: State input of shape [batch_size, 4, 160, 160, 3]
 
         Returns:
-          Tensor of shape [batch_size, NUM_VALID_ACTIONS] containing the estimated 
+          Tensor of shape [batch_size, NUM_VALID_ACTIONS] containing the estimated
           action values.
         """
         return sess.run(self.predictions, { self.inputs: s })
@@ -106,4 +111,3 @@ class Estimator():
         if self.summary_writer:
             self.summary_writer.add_summary(summaries, global_step)
         return loss
-
