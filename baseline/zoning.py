@@ -1,14 +1,14 @@
 """
 Implementation of Baseline Model Zoning.
 
-A building with N floors is divided into m zones, where m is the number of elevator cars. 
-Each zone get at least int(N/m) floors and one elevator car. If the number of zones is not 
+A building with N floors is divided into m zones, where m is the number of elevator cars.
+Each zone get at least int(N/m) floors and one elevator car. If the number of zones is not
 divisible by the number of floors, N mod m zones will get one additional floor.
-The boundaries of the zones are static, which means that the floors assigned to a 
-specific zone are not changed during the course of the simulation. The zones do only 
-consider the arrival floor of a passenger and not the destination. This makes the zoning 
-approach only viable in down-peak scenarios. When an elevator car is idle, it is sent to 
-the floor in the middle of its zone. When a car is moving, it can pick up passengers in 
+The boundaries of the zones are static, which means that the floors assigned to a
+specific zone are not changed during the course of the simulation. The zones do only
+consider the arrival floor of a passenger and not the destination. This makes the zoning
+approach only viable in down-peak scenarios. When an elevator car is idle, it is sent to
+the floor in the middle of its zone. When a car is moving, it can pick up passengers in
 the same movement direction inside its zone.
 
 """
@@ -18,7 +18,7 @@ from globals import *
 from environment import *
 import numpy as np
 
-NUM_EPOCHS = 1
+NUM_EPOCHS = 100
 
 
 class Building_z():
@@ -39,7 +39,7 @@ class Elevator_z(Elevator):
         self.valid_floors = zones[no]
         self.move_direction = self.reset_loc()
 
-    # Call when there are no one on the elevator -- to move the elevator to the middle 
+    # Call when there are no one on the elevator -- to move the elevator to the middle
     # of the zone
     def reset_loc(self):
         target_floor = self.valid_floors[len(self.valid_floors)/2]
