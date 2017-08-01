@@ -65,7 +65,7 @@ def lqf_run(epoch=1):
 
 def lqf_main():
     average_score = lqf_run(epoch=NUM_EPOCHS)
-    print("Average Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
+    print("[LQF Baseline]\tAverage Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
 
 if __name__ == "__main__":
     lqf_main()
