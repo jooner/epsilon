@@ -12,13 +12,18 @@ the floor in the middle of its zone. When a car is moving, it can pick up passen
 the same movement direction inside its zone.
 
 """
-from building import *
-from passenger import *
-from globals import *
-from environment import *
+import sys
+
+if "../" not in sys.path:
+  sys.path.append("../")
+
+from epsilon.building import *
+from epsilon.passenger import *
+from epsilon.globals import *
+from epsilon.environment import *
 import numpy as np
 
-NUM_EPOCHS = 100
+NUM_EPOCHS = 1
 
 
 class Building_z():
@@ -164,7 +169,7 @@ def zoning_run(epoch=1, zone_type="random"):
         building = Building_z(zones)
         zoning_env = Environment(building)
 
-        while not game_over(zoning_env):
+        while not zoning_env.is_done():
             zoning_env.populate()
             zoning_env.tic()
             action = zoning_controller(zoning_env)
@@ -176,7 +181,7 @@ def zoning_run(epoch=1, zone_type="random"):
 
 def zoning_main():
     average_score = zoning_run(epoch=NUM_EPOCHS)
-    print("[Zoning Baseline]\tAverage Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
+    print("Average Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
 
 if __name__ == '__main__':
     zoning_main()

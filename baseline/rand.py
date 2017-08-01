@@ -4,14 +4,14 @@ Implementation of Baseline Model Random:
 Randomly assign the elevators to random floors.
 
 """
-import sys 
+import sys
 
 if "../" not in sys.path:
   sys.path.append("../")
 
-from environment import *
-from building import *
-from globals import *
+from epsilon.environment import *
+from epsilon.building import *
+from epsilon.globals import *
 
 import numpy as np
 
@@ -22,8 +22,6 @@ def random_controller(env):
     action = [np.random.randint(3) - 1 for i in range(len(env.building.elevators))]
     return action
 
-def game_over(env):
-    return (env.total_pop >= MAX_POPULATION)
 
 def random_run(epoch=1):
     result = 0
@@ -32,7 +30,7 @@ def random_run(epoch=1):
         random_env = Environment(random_building)
         #print "---------------------%d"%i
 
-        while not game_over(random_env):
+        while not random_env.is_done():
             random_env.populate() # populate the building
             random_env.tic() # t += 1
             action = random_controller(random_env)

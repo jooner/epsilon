@@ -20,27 +20,55 @@ from epsilon.globals import *
 
 import numpy as np
 
-NUM_EPOCHS = 1
+NUM_EPOCHS = 100
 
 
 def lqf_controller(env):
-    action = [None] * NUM_ELEVATORS
-    priority_q = {} # important => lower q key
-    for floor in env.building.floors:
-        priority_q[-floor.get_cost()] = floor.value
-    for i, elevator in enumerate(env.building.elevators):
-        if elevator.move_direction == 0:
-            priority_flr = priority_q[min(priority_q.keys())]
-            action[i] = np.sign(priority_flr - elevator.curr_floor)
-        else: # elevator is moving
-            ## NOTE: Doesn't consider when to stop for loading -- only considers when to
-            ## stop for unloading.
-            is_upcall = env.building.floors[elevator.curr_floor].call[0]
-            is_downcall = env.building.floors[elevator.curr_floor].call[1]
-            if (is_upcall == elevator.move_direction) or (is_downcall == -elevator.move_direction):
-                action[i] = 0
+
+    def closest_elevator(elevators, target_floor, idx):
+        # find the closest elevator to the target floor
+        dist = []
+        for i, elevator in enumerate(elevators):
+            if i not in idx:
+                dist.append(np.inf)
             else:
-                action[i] = elevator.move_direction
+                dist.append(np.abs(elevator.curr_floor - target_floor))
+        return dist.index(min(dist))
+
+    action = [None] * NUM_ELEVATORS
+    stoplist = env.elevators_to_stop() # indices of elevators to stop
+    # find available elevators and stop elevators if they are on target floor
+    for i, elevator in enumerate(env.building.elevators):
+        if i in stoplist: # for unloading
+            action[i] == 0
+            continue
+        is_upcall = env.building.floors[elevator.curr_floor].call[0]
+        is_downcall = env.building.floors[elevator.curr_floor].call[1]
+
+        if (is_upcall == 1 and elevator.move_direction==1) or (is_downcall == 1 and elevator.move_direction == -1):
+            action[i] = 0
+        elif elevator.move_direction == 0 and elevator.curr_capacity == 0:
+            pass
+        elif elevator.move_direction == 0:
+            action[i] = np.sign(elevator.dict_passengers.keys()[0] - elevator.curr_floor)
+        else: # if elevator is moving it let the elevator maintain status quo
+            action[i] = elevator.move_direction
+    # if elevator is NOT moving, send the closest one to high priority floor
+    if None in action:
+        priority_q = {} # important => lower q key
+        idx = [i for i in xrange(len(action)) if action[i] == None]
+        for floor in env.building.floors:
+            priority_q[-floor.get_cost()] = floor.value
+        pq = sorted(priority_q)[:sum([1 for i in action if i == None])]
+        for p in pq:
+            target_floor = priority_q[p]
+            e_i = closest_elevator(env.building.elevators, target_floor, idx)
+            action[e_i] = np.sign(target_floor - env.building.elevators[e_i].curr_floor)
+
+    if None in action:
+        for i, a in enumerate(action):
+            if a == None:
+                action[i] = 0
     return action
 
 def lqf_run(epoch=1):
@@ -65,7 +93,7 @@ def lqf_run(epoch=1):
 
 def lqf_main():
     average_score = lqf_run(epoch=NUM_EPOCHS)
-    print("[LQF Baseline]\tAverage Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
+    print("Average Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
 
 if __name__ == "__main__":
     lqf_main()

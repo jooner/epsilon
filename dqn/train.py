@@ -137,8 +137,7 @@ def deep_q_learning(sess,
     # Populate the replay memory with initial experience
     print "Populating replay memory..."
     state = env.reset()
-    for x in range(replay_memory_init_size):
-        print x
+    for _ in range(replay_memory_init_size):
         action_probs = policy(sess, state, epsilons[min(total_t, epsilon_decay_steps-1)])
         action = []
         for i in range(NUM_ELEVATORS):
@@ -148,7 +147,6 @@ def deep_q_learning(sess,
             act = np.random.choice(np.arange(NUM_VALID_ACTIONS), p=act_p) - 1
             action.append(act)
         next_state, reward, done = env.step(action)
-
         replay_memory.append(Transition(state, action, reward, next_state, done))
         if done:
             state = env.reset()
@@ -185,7 +183,6 @@ def deep_q_learning(sess,
             #sys.stdout.flush()
 
             # Populate the environment
-            env.populate()
             env.tic()
 
             # Take a step

@@ -80,7 +80,6 @@ class Elevator(object):
         # reinitialize floor calls
         floor.call = [0,0]
         floor.update_call()
-
         return floor
 
     def unload(self, floor):
@@ -104,9 +103,13 @@ class Elevator(object):
         """
         # Update the current floor
         if self.move_direction == 1:
-            if self.curr_floor < NUM_FLOORS-1:
+            if self.curr_floor == NUM_FLOORS - 1:
+                self.move_direction = 0
+            if self.curr_floor < NUM_FLOORS - 1:
                 self.curr_floor += 1
         elif self.move_direction == -1:
+            if self.curr_floor == 0:
+                self.move_direction = 0
             if self.curr_floor > 0:
                 self.curr_floor -= 1
 

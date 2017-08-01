@@ -18,6 +18,7 @@ class Environment(object):
     def tic(self): # long live ke$ha
         # TODO: Make this faster without nested for loops
         self.time += 1
+        self.populate()
         for floor in self.building.floors:
             for passenger in floor.passenger_list:
                 passenger.time += 1
@@ -25,6 +26,16 @@ class Environment(object):
             for _, v in elevator.dict_passengers.iteritems():
                 for passenger in v:
                     passenger.time += 1
+
+    def elevators_to_stop(self):
+        # returns a list of elevator indices that need t ostop
+        stoplist = []
+        for i, e in enumerate(self.building.elevators):
+            if e.curr_capacity != 0:
+                for dest, _ in e.dict_passengers.iteritems():
+                    if e.curr_floor ==  dest:
+                        stoplist.append(i)
+        return stoplist
 
     def step(self, a):
         """
@@ -51,8 +62,6 @@ class Environment(object):
     def get_reward(self):
         reward = -sum([e.cumulative_cost for e in self.building.elevators])
         reward -= sum([f.get_cost() for f in self.building.floors])
-        if self.time % 1000 == 0:
-            print(reward)
         return reward
 
     def get_state(self):
