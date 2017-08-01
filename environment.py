@@ -42,14 +42,17 @@ class Environment(object):
             self.building.elevators[i].move(elevator_action)
             self.building.elevators[i].update()
         self.tic() # progress global time by t += 1
-        done = False
-        if self.curr_pop >= MAX_POPULATION:
-            done = True
-        return (self.get_state(), self.get_reward(), done)
+
+        return (self.get_state(), self.get_reward(), self.is_done())
+
+    def is_done(self):
+        return (self.time > TOTAL_SEC)
 
     def get_reward(self):
         reward = -sum([e.cumulative_cost for e in self.building.elevators])
         reward -= sum([f.get_cost() for f in self.building.floors])
+        if self.time % 1000 == 0:
+            print(reward)
         return reward
 
     def get_state(self):
@@ -65,7 +68,7 @@ class Environment(object):
 
     def populate(self):
         """Populate passenger objects"""
-        if self.time <  TOTAL_SEC:
+        if self.time < TOTAL_SEC:
             new_pop = self.population_plan[self.time]
             self.curr_pop += new_pop
             self.total_pop += new_pop
@@ -77,15 +80,18 @@ class Environment(object):
                 self.building.floors[passenger.start_floor].update_call()
 
     def update_global_time_list(self):
+        # TODO: make this faster by removing nested for loop
         for floor in self.building.floors:
             for p in floor.passenger_list:
                 self.global_time_list.append(p.time)
         for elev in self.building.elevators:
-            for k,v in elev.dict_passengers.iteritems():
+            for _,v in elev.dict_passengers.iteritems():
                 for p in v:
                     self.global_time_list.append(p.time)
 
     def reset(self):
+        print "reset"
         building = Building()
         self.__init__(building)
+        print "bottleneck clear"
         return self.get_state()

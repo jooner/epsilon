@@ -67,7 +67,7 @@ def deep_q_learning(sess,
                     epsilon_decay_steps=500000,
                     batch_size=32,
                     record_video_every=50):
-    
+
     EpisodeStats = namedtuple("Stats",["episode_lengths", "episode_rewards"])
     """
     Q-Learning algorithm for fff-policy TD control using Function Approximation.
@@ -81,7 +81,7 @@ def deep_q_learning(sess,
         num_episodes: Number of episodes to run for
         experiment_dir: Directory to save Tensorflow summaries in
         replay_memory_size: Size of the replay memory
-        replay_memory_init_size: Number of random experiences to sampel when initializing
+        replay_memory_init_size: Number of random experiences to sample when initializing
           the reply memory.
         update_target_estimator_every: Copy parameters from the Q estimator to the
           target estimator every N steps
@@ -137,7 +137,8 @@ def deep_q_learning(sess,
     # Populate the replay memory with initial experience
     print "Populating replay memory..."
     state = env.reset()
-    for _ in range(replay_memory_init_size):
+    for x in range(replay_memory_init_size):
+        print x
         action_probs = policy(sess, state, epsilons[min(total_t, epsilon_decay_steps-1)])
         action = []
         for i in range(NUM_ELEVATORS):
@@ -205,7 +206,7 @@ def deep_q_learning(sess,
                 replay_memory.pop(0)
 
             # Save transition to replay memory
-            replay_memory.append(Transition(state, action, reward, next_state, done))   
+            replay_memory.append(Transition(state, action, reward, next_state, done))
 
             # Update statistics
             stats.episode_rewards[i_episode] += reward

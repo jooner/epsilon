@@ -9,14 +9,18 @@ where multiple elevator cars arrive at the same floor simultaneously, often
 occurs in practice.
 
 """
+import sys
 
-from environment import Environment
-from building import Building
-from globals import *
+if "../" not in sys.path:
+  sys.path.append("../")
+
+from epsilon.environment import Environment
+from epsilon.building import Building
+from epsilon.globals import *
 
 import numpy as np
 
-NUM_EPOCHS = 100
+NUM_EPOCHS = 1
 
 
 def lqf_controller(env):
@@ -39,10 +43,6 @@ def lqf_controller(env):
                 action[i] = elevator.move_direction
     return action
 
-
-def game_over(env):
-    return (env.total_pop >= MAX_POPULATION)
-
 def lqf_run(epoch=1):
     result = 0
     for i in range(epoch):
@@ -50,7 +50,7 @@ def lqf_run(epoch=1):
         lqf_env = Environment(lqf_building)
         #print "---------------------%d"%i
 
-        while not game_over(lqf_env):
+        while not lqf_env.is_done():
             #print lqf_env.total_pop
             lqf_env.populate() # populate the building
             lqf_env.tic() # t += 1
