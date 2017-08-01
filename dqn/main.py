@@ -33,7 +33,7 @@ with tf.Session() as sess:
                                     q_estimator=q_estimator,
                                     target_estimator=target_estimator,
                                     experiment_dir=experiment_dir,
-                                    num_episodes=1000,
+                                    num_episodes=5000,
                                     replay_memory_size=5000,
                                     replay_memory_init_size=500,
                                     update_target_estimator_every=100,

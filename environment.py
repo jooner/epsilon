@@ -12,13 +12,17 @@ class Environment(object):
         self.curr_pop = 0
         self.building = building
         self.global_time_list = []
+        # 0.2 arrivals per sec over 7200 secs (2 hrs)
+        self.population_plan = np.random.poisson(0.2, TOTAL_SEC)
 
     def tic(self): # long live ke$ha
+        # TODO: Make this faster without nested for loops
+        self.time += 1
         for floor in self.building.floors:
             for passenger in floor.passenger_list:
                 passenger.time += 1
         for elevator in self.building.elevators:
-            for k, v in elevator.dict_passengers.iteritems():
+            for _, v in elevator.dict_passengers.iteritems():
                 for passenger in v:
                     passenger.time += 1
 
@@ -61,8 +65,8 @@ class Environment(object):
 
     def populate(self):
         """Populate passenger objects"""
-        if self.total_pop < MAX_POPULATION:
-            new_pop = randint(0, 5)
+        if self.time <  TOTAL_SEC:
+            new_pop = self.population_plan[self.time]
             self.curr_pop += new_pop
             self.total_pop += new_pop
             for _ in xrange(new_pop):
