@@ -23,8 +23,6 @@ from epsilon.globals import *
 from epsilon.environment import *
 import numpy as np
 
-NUM_EPOCHS = 1
-
 
 class Building_z():
     def __init__(self, zones):
@@ -75,20 +73,6 @@ class Elevator_z(Elevator):
 
         return floor
 
-    def unload_target_floors(self):
-        # find the list of floors the elevator has to go
-        return self.dict_passengers.keys()
-
-    def unload_closest_floor(self):
-        # find the closest floor to the current location
-        dist = [np.abs(self.curr_floor - x) for x in self.unload_target_floors()]
-        if dist == []:
-            return self.valid_floors[len(self.valid_floors)/2]
-        return self.unload_target_floors()[dist.index(min(dist))]
-
-def game_over(env):
-    return (env.total_pop >= MAX_POPULATION)
-
 def _partition(lst, n):
     # Helper function: partition a lst into n approximately-equally-sized lists
     division = len(lst) / float(n)
@@ -103,55 +87,29 @@ def divide_random_zones():
     floors = list(np.random.permutation(NUM_FLOORS))
     return _partition(floors, NUM_ELEVATORS)
 
-def load_closest_floor(call_dict, current_floor, valid_floors, movement_direction):
-    # find the closest floor to load passengers
-    floors = []
-    for f in valid_floors:
-        [up, down] = call_dict[f]
-        if movement_direction == 1 and up:
-            floors.append(f)
-        elif movement_direction == -1 and down:
-            floors.append(f)
-        else:
-            pass
-    dist = [np.abs(current_floor - x) for x in floors]
-    if dist == []:
-        return valid_floors[len(valid_floors)/2]
-    return floors[dist.index(min(dist))]
-
 def zoning_controller(env):
-    action = [0] * NUM_ELEVATORS
-    # construct a call info for each floor
-    call_dict = dict()
-    for floor in env.building.floors:
-        call_dict[floor.value] = floor.call
-    up_floors = [x for x, v in call_dict.iteritems() if v[0] == 1]
-    down_floors = [x for x, v in call_dict.iteritems() if v[1] == 1]
+    action = [None] * NUM_ELEVATORS
+    stoplist = env.elevators_to_stop()
     for i, elevator in enumerate(env.building.elevators):
-        if elevator.curr_capacity == 0:
-            action[i] = elevator.reset_loc()
+        if i in stoplist:
+            action[i] = 0
+            continue
 
-        if elevator.move_direction == 0:
-            target = elevator.unload_closest_floor()
-            action[i] = np.sign(target - elevator.curr_floor)
-        else: # elevator is moving
-            # decide whether to move to load or move to unload
-            f_load = load_closest_floor(call_dict, elevator.curr_floor, elevator.valid_floors, elevator.move_direction)
-            f_unload = elevator.unload_closest_floor()
-            if np.abs(elevator.curr_floor - f_load) > np.abs(elevator.curr_floor - f_unload):
-                # move to unload
-                if elevator.curr_floor in elevator.valid_floors:
-                    is_upcall = env.building.floors[elevator.curr_floor].call[0]
-                    is_downcall = env.building.floors[elevator.curr_floor].call[1]
-                    if (is_upcall == elevator.move_direction) or (is_downcall == -elevator.move_direction):
-                        action[i] = 0
-                    else:
-                        action[i] = elevator.move_direction
-                else:
-                    action[i] = elevator.move_direction
-            else:
-                # move to load
-                action[i] = np.sign(f_load - elevator.curr_floor)
+        is_upcall = env.building.floors[elevator.curr_floor].call[0]
+        is_downcall = env.building.floors[elevator.curr_floor].call[1]
+        if (is_upcall == 1 and elevator.move_direction==1 and elevator.curr_floor in elevator.valid_floors) or \
+        (is_downcall == 1 and elevator.move_direction == -1 and elevator.curr_floor in elevator.valid_floors):
+            action[i] = 0 # stopping elevator for loading
+
+        elif elevator.move_direction == 0 and elevator.curr_capacity == 0:
+            midzone = elevator.valid_floors[len(elevator.valid_floors)/2]
+            action[i] = np.sign(midzone - elevator.curr_floor)
+
+        elif elevator.move_direction == 0:
+            action[i] = np.sign(elevator.dict_passengers.keys()[0] - elevator.curr_floor)
+        else: # if elevator is moving it let the elevator maintain status quo
+            action[i] = elevator.move_direction
+
     return action
 
 def zoning_run(epoch=1, zone_type="random"):

@@ -20,8 +20,6 @@ from epsilon.globals import *
 
 import numpy as np
 
-NUM_EPOCHS = 100
-
 
 def lqf_controller(env):
 
@@ -40,7 +38,7 @@ def lqf_controller(env):
     # find available elevators and stop elevators if they are on target floor
     for i, elevator in enumerate(env.building.elevators):
         if i in stoplist: # for unloading
-            action[i] == 0
+            action[i] = 0
             continue
         is_upcall = env.building.floors[elevator.curr_floor].call[0]
         is_downcall = env.building.floors[elevator.curr_floor].call[1]
@@ -54,6 +52,7 @@ def lqf_controller(env):
         else: # if elevator is moving it let the elevator maintain status quo
             action[i] = elevator.move_direction
     # if elevator is NOT moving, send the closest one to high priority floor
+
     if None in action:
         priority_q = {} # important => lower q key
         idx = [i for i in xrange(len(action)) if action[i] == None]
