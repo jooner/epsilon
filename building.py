@@ -30,7 +30,7 @@ class Floor(object):
                 pass
 
     def get_cost(self):
-        return sum([p.time for p in self.passenger_list])
+        return sum([(p.time)**2 for p in self.passenger_list])
 
 class Elevator(object):
     def __init__(self):
@@ -71,7 +71,7 @@ class Elevator(object):
                 self.dict_passengers[p.destination].append(p)
             del_list.append(i)
             self.curr_capacity += 1
-            self.cumulative_cost += p.time
+            self.cumulative_cost += p.time ** 2
         temp = []
         for i in xrange(len(floor.passenger_list)):
             if i not in del_list:
@@ -88,13 +88,12 @@ class Elevator(object):
         """
         total_time = []
         if floor.value in self.dict_passengers.keys():
-            for x in self.dict_passengers[floor.value]:
-                self.cumulative_cost -= x.time
+            for p in self.dict_passengers[floor.value]:
+                # reward when unloading person
+                self.cumulative_cost -= p.time ** 2
                 self.curr_capacity -= 1
-                total_time.append(x.time)
+                total_time.append(p.time)
             self.dict_passengers.pop(floor.value, None)
-
-        #print total_time
         return total_time
 
     def update(self):
@@ -114,4 +113,5 @@ class Elevator(object):
                 self.curr_floor -= 1
 
         # Update the cost
-        self.cumulative_cost += self.curr_capacity
+        for passengers in self.dict_passengers.values():
+            self.cumulative_cost += sum([p.time ** 2 for p in passengers])

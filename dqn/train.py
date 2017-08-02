@@ -40,14 +40,13 @@ def make_epsilon_greedy_policy(estimator, nA):
     """
     def policy_fn(sess, observation, epsilon):
         A = np.ones(nA, dtype=float) * epsilon / nA
-        q_values = estimator.predict(sess, np.expand_dims(observation, 0))
+        q_values = estimator.predict(sess, np.expand_dims(observation, 0))[0]
         #best_action = tf.Variable([tf.argmax(q_values[:3]) -1,
         #                           tf.argmax(q_values[3:6]) -1,
         #                           tf.argmax(q_values[6:]) -1])
-        # np.argmax(q_values)
         for i in range(NUM_ELEVATORS):
             i *= NUM_ELEVATORS
-            A[i:i+len(VALID_ACTIONS)][np.argmax(A[i:i+len(VALID_ACTIONS)])] += (1.0 - epsilon)
+            A[i:i+len(VALID_ACTIONS)][np.argmax(q_values[i:i+len(VALID_ACTIONS)])] += (1.0 - epsilon)
         return A
     return policy_fn
 

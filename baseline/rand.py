@@ -15,8 +15,6 @@ from epsilon.globals import *
 
 import numpy as np
 
-NUM_EPOCHS = 100
-
 
 def random_controller(env):
     action = [np.random.randint(3) - 1 for i in range(len(env.building.elevators))]

@@ -47,8 +47,8 @@ class Estimator():
         self.actions_pl = tf.placeholder(shape=[None, NUM_ELEVATORS], dtype=tf.int32, name="actions")
         score_pred = []
         # Fully connected layers with RELU
-        fc1 = tf.contrib.layers.fully_connected(self.inputs, 512)
-        fc2 = tf.contrib.layers.fully_connected(fc1, 512)
+        fc1 = tf.contrib.layers.fully_connected(self.inputs, 256)
+        fc2 = tf.contrib.layers.fully_connected(fc1, 128)
         self.predictions = tf.contrib.layers.fully_connected(fc2, self.a_dim * 3)
         index_gatherer = tf.range(NUM_ELEVATORS) * NUM_VALID_ACTIONS
         for i in range(self.batch_size):
@@ -65,8 +65,12 @@ class Estimator():
         self.loss = tf.reduce_mean(self.losses)
 
         # Optimizer Parameters from original paper
-        self.optimizer = tf.train.RMSPropOptimizer(0.00025, 0.99, 0.0, 1e-6)
-        self.train_op = self.optimizer.minimize(self.loss, global_step=tf.contrib.framework.get_global_step())
+        self.optimizer = tf.train.RMSPropOptimizer(learning_rate=0.00025,
+                                                   decay=0.99,
+                                                   momentum=0.0,
+                                                   epsilon=1e-6)
+        self.train_op = self.optimizer.minimize(self.loss,
+                                                global_step=tf.contrib.framework.get_global_step())
 
         # Summaries for Tensorboard
         self.summaries = tf.summary.merge([

@@ -1,3 +1,1 @@
-1. Random population -> Poisson process
-2. Random baseline
-3. Run LQF/Zoning/Random/DQN on known toy problem
+run DQN

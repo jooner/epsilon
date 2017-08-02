@@ -139,7 +139,7 @@ def zoning_run(epoch=1, zone_type="random"):
 
 def zoning_main():
     average_score = zoning_run(epoch=NUM_EPOCHS)
-    print("Average Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
+    print("[Zoning Baseline]\tAverage Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
 
 if __name__ == '__main__':
     zoning_main()

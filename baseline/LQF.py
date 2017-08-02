@@ -42,7 +42,6 @@ def lqf_controller(env):
             continue
         is_upcall = env.building.floors[elevator.curr_floor].call[0]
         is_downcall = env.building.floors[elevator.curr_floor].call[1]
-
         if (is_upcall == 1 and elevator.move_direction==1) or (is_downcall == 1 and elevator.move_direction == -1):
             action[i] = 0
         elif elevator.move_direction == 0 and elevator.curr_capacity == 0:
@@ -92,7 +91,7 @@ def lqf_run(epoch=1):
 
 def lqf_main():
     average_score = lqf_run(epoch=NUM_EPOCHS)
-    print("Average Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
+    print("[LQF Baseline]\t\tAverage Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
 
 if __name__ == "__main__":
     lqf_main()
