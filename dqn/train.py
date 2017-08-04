@@ -41,12 +41,17 @@ def make_epsilon_greedy_policy(estimator, nA):
     def policy_fn(sess, observation, epsilon):
         A = np.ones(nA, dtype=float) * epsilon / nA
         q_values = estimator.predict(sess, np.expand_dims(observation, 0))[0]
-        #best_action = tf.Variable([tf.argmax(q_values[:3]) -1,
-        #                           tf.argmax(q_values[3:6]) -1,
-        #                           tf.argmax(q_values[6:]) -1])
+        best_action_idx = np.argmax(q_values)
+        act_per_elevator = []
         for i in range(NUM_ELEVATORS):
-            i *= NUM_ELEVATORS
-            A[i:i+len(VALID_ACTIONS)][np.argmax(q_values[i:i+len(VALID_ACTIONS)])] += (1.0 - epsilon)
+            sp = NUM_VALID_ACTIONS ** (NUM_ELEVATORS - i - 1)
+            count = 0
+            while best_action_idx > sp:
+                best_action_idx -= sp
+                count += 1
+            act_per_elevator.append(count)
+        for i, a in enumerate(act_per_elevator):
+            A[i * NUM_VALID_ACTIONS + a] += (1.0 - epsilon)
         return A
     return policy_fn
 
@@ -130,21 +135,24 @@ def deep_q_learning(sess,
 
     # The policy we're following
     policy = make_epsilon_greedy_policy(
-        q_estimator,
-        NUM_ELEVATORS * len(VALID_ACTIONS))
+        q_estimator, NUM_VALID_ACTIONS * NUM_ELEVATORS)
+
+    def get_action(action_probs):
+        action = []
+        for i in range(NUM_ELEVATORS):
+            i *= NUM_VALID_ACTIONS
+            ss = action_probs[i:i+NUM_VALID_ACTIONS].sum(axis=0)
+            act_p = action_probs[i:i+NUM_VALID_ACTIONS] / ss
+            act = np.random.choice(np.arange(NUM_VALID_ACTIONS), p=act_p) - 1
+            action.append(act)
+        return action
 
     # Populate the replay memory with initial experience
     print "Populating replay memory..."
     state = env.reset()
     for _ in range(replay_memory_init_size):
         action_probs = policy(sess, state, epsilons[min(total_t, epsilon_decay_steps-1)])
-        action = []
-        for i in range(NUM_ELEVATORS):
-            i *= 3
-            ss = action_probs[i:i+3].sum(axis=0)
-            act_p = action_probs[i:i+3] / ss
-            act = np.random.choice(np.arange(NUM_VALID_ACTIONS), p=act_p) - 1
-            action.append(act)
+        action = get_action(action_probs)
         next_state, reward, done = env.step(action)
         replay_memory.append(Transition(state, action, reward, next_state, done))
         if done:
@@ -186,15 +194,7 @@ def deep_q_learning(sess,
 
             # Take a step
             action_probs = policy(sess, state, epsilon)
-            action = []
-            for i in range(NUM_ELEVATORS):
-                i *= 3
-                ss = action_probs[i:i+3].sum(axis=0)
-                act_p = action_probs[i:i+3] / ss
-                act = np.random.choice(np.arange(NUM_VALID_ACTIONS), p=act_p) - 1
-                action.append(act)
-            #action_probs = policy(sess, state, epsilon)
-            #action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
+            action = get_action(action_probs)
             next_state, reward, done = env.step(action)
 
             # If our replay memory is full, pop the first element
@@ -213,15 +213,26 @@ def deep_q_learning(sess,
             states_batch, action_batch, reward_batch, next_states_batch, done_batch = map(np.array, zip(*samples))
 
             # Calculate q values and targets (Double DQN)
+            # aligned in batch sizes
             q_values_next = q_estimator.predict(sess, next_states_batch)
             best_actions = np.argmax(q_values_next, axis=1)
             q_values_next_target = target_estimator.predict(sess, next_states_batch)
+
             targets_batch = reward_batch + np.invert(done_batch).astype(np.float32) * \
-                discount_factor * q_values_next_target[np.arange(batch_size), best_actions]
+                            discount_factor * q_values_next_target[np.arange(batch_size), best_actions]
 
             # Perform gradient descent update
             states_batch = np.array(states_batch)
             loss = q_estimator.update(sess, states_batch, action_batch, targets_batch)
+
+            if t % 350 == 0:
+                print q_values_next
+                print best_actions
+                print q_values_next_target
+                print targets_batch
+                print states_batch
+                print loss
+                raise ValueError("REVIEW")
 
             if done:
                 break
@@ -230,7 +241,7 @@ def deep_q_learning(sess,
             total_t += 1
 
         env.update_global_time_list()
-        avg_time = sum(env.global_time_list) / float(env.total_pop)
+        avg_time = sum(env.global_time_list) / float(len(env.global_time_list))
 
         # Add summaries to tensorboard
         episode_summary = tf.Summary()

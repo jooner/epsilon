@@ -30,7 +30,7 @@ class Floor(object):
                 pass
 
     def get_cost(self):
-        return sum([(p.time)**2 for p in self.passenger_list])
+        return sum([(p.time**2) for p in self.passenger_list])
 
 class Elevator(object):
     def __init__(self):
@@ -114,4 +114,4 @@ class Elevator(object):
 
         # Update the cost
         for passengers in self.dict_passengers.values():
-            self.cumulative_cost += sum([p.time ** 2 for p in passengers])
+            self.cumulative_cost += sum([(p.time ** 2) for p in passengers])
