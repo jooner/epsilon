@@ -60,18 +60,19 @@ class Environment(object):
         return (self.time > TOTAL_SEC)
 
     def get_reward(self):
-
         reward = -sum([e.cumulative_cost for e in self.building.elevators])
         reward -= sum([f.get_cost() for f in self.building.floors])
-        return reward / float(1e7)
+        return reward / float(1e8)
+
         """
         try:
-            return -sum(self.global_time_list) / float(len(self.global_time_list))
+            return (-sum(self.global_time_list) / float(len(self.global_time_list))) /float(1e3)
         except:
             return 0
         """
 
     def get_state(self):
+        """
         state = np.zeros(NUM_FLOORS * 2 + NUM_ELEVATORS * 3)
         idx = 0
         for floor in self.building.floors:
@@ -80,6 +81,19 @@ class Environment(object):
         for elevator in self.building.elevators:
             state[idx:idx+3] = [elevator.curr_floor, elevator.move_direction, elevator.curr_capacity]
             idx += 3
+        """
+        state = np.zeros(4 * NUM_FLOORS)
+        for i, floor in enumerate(self.building.floors):
+            i *= 4
+            i += floor.call[0] + floor.call[1] * 2
+            state[i] = 1
+        for elevator in self.building.elevators:
+            part_state = np.zeros((MAX_CAP_ELEVATOR+1) * NUM_VALID_ACTIONS * NUM_FLOORS)
+            part_idx = elevator.curr_floor * (MAX_CAP_ELEVATOR+1) * NUM_VALID_ACTIONS + \
+                       elevator.curr_capacity * NUM_VALID_ACTIONS + elevator.move_direction + 1
+            part_state[part_idx] = 1
+            state = np.append(state, part_state)
+
         return state
 
     def populate(self):

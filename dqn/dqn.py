@@ -5,6 +5,10 @@ import random
 import sys
 import tensorflow as tf
 
+"""
+Orignal Code provided by https://github.com/dennybritz/reinforcement-learning/blob/master/DQN/dqn.py
+
+"""
 
 if "../" not in sys.path:
   sys.path.append("../")
@@ -44,27 +48,16 @@ class Estimator():
         # The TD target value
         self.y_pl = tf.placeholder(shape=[None], dtype=tf.float32, name="y")
         # Integer id of which action was selected
-        self.actions_pl = tf.placeholder(shape=[None, NUM_ELEVATORS], dtype=tf.int32, name="actions")
-        score_pred = []
+        self.actions_pl = tf.placeholder(shape=[None], dtype=tf.int32, name="actions")
         # Fully connected layers with RELU
         fc1 = tf.contrib.layers.fully_connected(self.inputs, 512)
         fc2 = tf.contrib.layers.fully_connected(fc1, 512)
-        self.predictions = tf.contrib.layers.fully_connected(fc2, self.a_dim)
-        actions = self.actions_pl + 1
-        indices = np.zeros(self.batch_size, dtype=np.int) # of size batch_size
-        for b_idx in range(self.batch_size):
-            batch_actions = actions[b_idx]
-            np.append(indices, sum((NUM_VALID_ACTIONS ** e_i) * e_action for e_i, e_action in enumerate(tf.unstack(batch_actions))))
-        score_pred.append(tf.gather(tf.reshape(self.predictions, [-1]), indices))
-        # list of length batch_size with each element being a sum of probabilities for each chosen action
-        score_pred = tf.stack(score_pred)
-
-        # Get the predictions for the chosen actions only
-        # gather_indices = tf.range(batch_size) * tf.shape(self.predictions)[1] + self.actions_pl
-        # self.action_predictions = tf.gather(tf.reshape(self.predictions, [-1]), gather_indices)
+        fc3 = tf.contrib.layers.fully_connected(fc2, 128, activation_fn=None)
+        self.predictions = tf.contrib.layers.fully_connected(fc3, self.a_dim, activation_fn=None)
+        self.action_predictions = tf.gather(tf.reshape(self.predictions, [-1]), self.actions_pl)
 
         # Calcualte the loss
-        self.losses = tf.squared_difference(self.y_pl, score_pred)
+        self.losses = tf.squared_difference(self.y_pl, self.action_predictions)
         self.loss = tf.reduce_mean(self.losses)
 
         # Optimizer Parameters from original paper

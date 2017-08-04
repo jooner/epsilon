@@ -211,7 +211,12 @@ def deep_q_learning(sess,
             # Sample a minibatch from the replay memory
             samples = random.sample(replay_memory, batch_size)
             states_batch, action_batch, reward_batch, next_states_batch, done_batch = map(np.array, zip(*samples))
-
+            action_batch += 1
+            indices = []
+            for b_idx in range(batch_size):
+                indices.append(sum([(NUM_VALID_ACTIONS ** (NUM_ELEVATORS-i-1)) * a \
+                               for i, a in enumerate(action_batch[b_idx])]))
+            action_batch = indices
             # Calculate q values and targets (Double DQN)
             # aligned in batch sizes
             q_values_next = q_estimator.predict(sess, next_states_batch)
@@ -224,16 +229,19 @@ def deep_q_learning(sess,
             # Perform gradient descent update
             states_batch = np.array(states_batch)
             loss = q_estimator.update(sess, states_batch, action_batch, targets_batch)
-
-            if t % 350 == 0:
+            """
+            if t % 400 == 0:
+                print "q_values_next"
                 print q_values_next
                 print best_actions
-                print q_values_next_target
+                print "q_values_next_target"
+                #print q_values_next_target
+                #print next_states_batch
+                print "target_batch"
                 print targets_batch
                 print states_batch
-                print loss
-                raise ValueError("REVIEW")
-
+                print "LOSS %f" %loss
+            """
             if done:
                 break
 

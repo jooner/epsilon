@@ -20,6 +20,7 @@ experiment_dir = os.path.abspath("./experiments/{}".format(st))
 global_step = tf.Variable(0, name='global_step', trainable=False)
 
 s_dim = len(env.get_state())
+print s_dim
 a_dim = NUM_VALID_ACTIONS ** NUM_ELEVATORS # intractable...
 
 # Create estimators
@@ -33,7 +34,7 @@ with tf.Session() as sess:
                                     q_estimator=q_estimator,
                                     target_estimator=target_estimator,
                                     experiment_dir=experiment_dir,
-                                    num_episodes=3000,
+                                    num_episodes=500,
                                     replay_memory_size=10000,
                                     replay_memory_init_size=1000,
                                     update_target_estimator_every=1000,
@@ -41,6 +42,6 @@ with tf.Session() as sess:
                                     epsilon_end=0.1,
                                     epsilon_decay_steps=50000,
                                     discount_factor=0.99,
-                                    batch_size=32):
+                                    batch_size=1):
 
         print "Episode {}\t  Reward: {}\t Episode AvgWaitTime: {}".format(num_ep, stats.episode_rewards[-1], avg_t)
