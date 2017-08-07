@@ -42,6 +42,7 @@ def make_epsilon_greedy_policy(estimator, nA):
         A = np.ones(nA, dtype=float) * epsilon / nA
         q_values = estimator.predict(sess, np.expand_dims(observation, 0))[0]
         best_action_idx = np.argmax(q_values)
+        ba = best_action_idx
         act_per_elevator = []
         for i in range(NUM_ELEVATORS):
             sp = NUM_VALID_ACTIONS ** (NUM_ELEVATORS - i - 1)

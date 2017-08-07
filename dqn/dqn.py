@@ -44,15 +44,24 @@ class Estimator():
         Builds the Tensorflow graph.
         """
         # Placeholders for our input
-        self.inputs = tf.placeholder(shape=[None, self.s_dim], dtype=tf.float32)
+        a, b = self.s_dim
+        self.inputs = tf.placeholder(shape=[None, a,b], dtype=tf.float32)
         # The TD target value
         self.y_pl = tf.placeholder(shape=[None], dtype=tf.float32, name="y")
         # Integer id of which action was selected
         self.actions_pl = tf.placeholder(shape=[None], dtype=tf.int32, name="actions")
+        X = tf.expand_dims(tf.to_float(self.inputs),-1)
+        conv1 = tf.contrib.layers.conv2d(
+            X, 8, 4, 2, activation_fn=tf.nn.relu)
+        conv2 = tf.contrib.layers.conv2d(
+            conv1, 16, 2, 2, activation_fn=tf.nn.relu)
+        conv3 = tf.contrib.layers.conv2d(
+            conv2, 32, 2, 1, activation_fn=tf.nn.relu)
+        flattened = tf.contrib.layers.flatten(conv3)
         # Fully connected layers with RELU
-        fc1 = tf.contrib.layers.fully_connected(self.inputs, 512)
+        fc1 = tf.contrib.layers.fully_connected(flattened, 512)
         fc2 = tf.contrib.layers.fully_connected(fc1, 512)
-        fc3 = tf.contrib.layers.fully_connected(fc2, 128, activation_fn=None)
+        fc3 = tf.contrib.layers.fully_connected(fc2, 512, activation_fn=None)
         self.predictions = tf.contrib.layers.fully_connected(fc3, self.a_dim, activation_fn=None)
         self.action_predictions = tf.gather(tf.reshape(self.predictions, [-1]), self.actions_pl)
 
