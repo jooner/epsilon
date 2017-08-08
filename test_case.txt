@@ -1,0 +1,47 @@
+NUM_ELEVATORS = 2
+NUM_FLOORS = 3
+MAX_CAP = 2
+
+Five types of people (start floor -> destination):
+
+A (0 -> 2)
+B (0 -> 1)
+C (2 -> 0)
+D (3 -> 1)
+E (2 -> 3)
+
+
+What elevators should do for each time step:
+
+E1: stop. curr_floor = 0. load A and B. A, B on board.
+E2: move up. curr_floor = 0
+
+E1: move up. curr_floor = 1. A, B on board.
+E2: move up. curr_floor = 1. empty. 
+
+E1: stop. curr_floor = 1. unload B. A on board
+E2: move up. curr_floor = 2. empty
+
+E1: move up. curr_floor = 2. A on board.
+E2: stop. curr_floor = 2. load E. E on board.
+
+E1: stop. curr_floor = 2 unload A. load C. C on board.
+E2: move up. curr_floor = 3. E on board
+
+E1: move down. curr_floor = 1. C on board.
+E2: stop. curr_floor = 3. unload E. load D. D on board.
+
+E1: move down. curr_floor = 0. C on board. 
+E2: move down. curr_floor = 2. D on board.
+
+E1: stop. curr_floor = 0. unload C. empty.
+E2: move down. curr_floor = 1. D on board.
+
+E1: stop. curr_floor = 0. empty.
+E2: stop. curr_floor = 1. unload D. empty.
+
+E1: stop. curr_floor = 0. empty.
+E2. stop. curr_floor = 1. empty.
+
+
+
