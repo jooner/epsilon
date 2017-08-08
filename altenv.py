@@ -74,8 +74,6 @@ class Environment(object):
             for destination, passenger_list in elevator.dict_passengers.iteritems():
                 state[2*j+1, elevator.curr_floor, destination] += len(passenger_list)
                 state[2*j+2, elevator.curr_floor, destination] += sum([p.time for p in passenger_list])
-        print "STATE # {}".format(self.time)
-        print state
         return state
 
 

@@ -76,7 +76,6 @@ class Elevator(object):
                         self.dict_passengers[p.destination] = [p]
                     else:
                         self.dict_passengers[p.destination].append(p)
-                    print "loaded!"
                     del_list.append(i)
                     self.curr_capacity += 1
                     self.cumulative_cost += p.time ** 2 - p.time
@@ -102,7 +101,6 @@ class Elevator(object):
                 self.curr_capacity -= 1
                 total_time.append(p.time)
             self.dict_passengers.pop(floor.value, None)
-            print "unloaded!"
         return total_time
 
     def update(self):

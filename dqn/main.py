@@ -1,7 +1,7 @@
 from dqn import *
 from epsilon.globals import *
 from epsilon.building import *
-from epsilon.environment import *
+from epsilon.altenv import *
 import tensorflow as tf
 import datetime, time
 from train import *
@@ -34,14 +34,14 @@ with tf.Session() as sess:
                                     q_estimator=q_estimator,
                                     target_estimator=target_estimator,
                                     experiment_dir=experiment_dir,
-                                    num_episodes=500,
-                                    replay_memory_size=20000,
-                                    replay_memory_init_size=10000,
-                                    update_target_estimator_every=2000,
+                                    num_episodes=1000,
+                                    replay_memory_size=1000,
+                                    replay_memory_init_size=100,
+                                    update_target_estimator_every=100,
                                     epsilon_start=1.0,
                                     epsilon_end=0.1,
                                     epsilon_decay_steps=50000,
                                     discount_factor=0.99,
-                                    batch_size=1):
+                                    batch_size=2):
 
         print "Episode {}\t  Reward: {}\t Episode AvgWaitTime: {}".format(num_ep, stats.episode_rewards[-1], avg_t)
