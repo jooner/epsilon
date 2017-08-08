@@ -79,19 +79,27 @@ class Environment(object):
 #        print "\n"
         return state
 
-
     def populate(self):  # TODO
-        """Populate passenger objects"""
-        if self.time < TOTAL_SEC:
-            new_pop = self.population_plan[self.time]
-            self.curr_pop += new_pop
-            self.total_pop += new_pop
-            for _ in xrange(new_pop):
-                passenger = Passenger()
-                passenger.destination = choice(range(0, passenger.start_floor) +
-                                               range(passenger.start_floor + 1, NUM_FLOORS))
-                self.building.floors[passenger.start_floor].passenger_list.append(passenger)
-                self.building.floors[passenger.start_floor].update_call()
+        """Populate passenger objects. Hard Code the numbers. yay.
+        Experiments should be run with num_floor = 3, num_elev = 2, cap = 2."""
+        self.state = np.zeros((NUM_FLOORS, NUM_FLOORS, 2))
+        self.state[0, 2, 0] += 1
+        self.state[0, 1, 0] += 1
+        self.state[2, 3, 0] += 1
+        self.state[2, 0, 0] += 1
+        self.state[3, 1, 0] += 1
+
+        start_dest_pairs = [(0,2), (0,1), (2,0), (3,1), (2,3)]
+
+        self.curr_pop += 5
+        self.total_pop += 5
+
+        for pair in start_dest_pairs:
+            passenger = Passenger()
+            passenger.start_floor = pair[0]
+            passenger.destination = pair[1]
+            self.building.floors[passenger.start_floor].passenger_list.append(passenger)
+            self.building.floors[passenger.start_floor].update_call()
 
     def update_global_time_list(self):
         # TODO: make this faster by removing nested for loop
