@@ -13,14 +13,14 @@ class Environment(object):
         self.building = building
         self.global_time_list = []
         self.old_state = np.zeros([NUM_FLOORS, (MAX_CAP_ELEVATOR) + NUM_VALID_ACTIONS + 4 + 1])
+        self.populate()
         # 0.2 arrivals per sec over 7200 secs (2 hrs)
-        self.population_plan = np.random.poisson(0.2, TOTAL_SEC)
-        print self.population_plan
+        #self.population_plan = np.random.poisson(0.2, TOTAL_SEC)
 
     def tic(self): # long live ke$ha
         # TODO: Make this faster without nested for loops
         self.time += 1
-        self.populate()
+        #self.populate()
         for floor in self.building.floors:
             for passenger in floor.passenger_list:
                 passenger.time += 1
@@ -74,20 +74,20 @@ class Environment(object):
             for destination, passenger_list in elevator.dict_passengers.iteritems():
                 state[2*j+1, elevator.curr_floor, destination] += len(passenger_list)
                 state[2*j+2, elevator.curr_floor, destination] += sum([p.time for p in passenger_list])
+        print "STATE # {}".format(self.time)
         print state
-        print "\n"
         return state
 
 
     def populate(self):  # TODO
         """Populate passenger objects. Hard Code the numbers. yay.
         Experiments should be run with num_floor = 3, num_elev = 2, cap = 2."""
-        self.state = np.zeros((NUM_FLOORS, NUM_FLOORS, 2))
-        self.state[0, 2, 0] += 1
-        self.state[0, 1, 0] += 1
-        self.state[2, 3, 0] += 1
-        self.state[2, 0, 0] += 1
-        self.state[3, 1, 0] += 1
+#        self.state = np.zeros((NUM_FLOORS, NUM_FLOORS, 2))
+#        self.state[0, 2, 0] += 1
+#        self.state[0, 1, 0] += 1
+#        self.state[2, 3, 0] += 1
+#        self.state[2, 0, 0] += 1
+#        self.state[3, 1, 0] += 1
 
         start_dest_pairs = [(0,2), (0,1), (2,0), (3,1), (2,3)]
 

@@ -1,3 +1,5 @@
+import numpy as np
+
 from globals import *
 
 class Building(object):
@@ -62,25 +64,30 @@ class Elevator(object):
         Given Floor object, load the passengers
         """
         del_list = [] # idices of passenger objects to remove
-        for i, p in enumerate(floor.passenger_list):
-            if self.curr_capacity >= MAX_CAP_ELEVATOR:
-                break
-            if p.destination not in self.dict_passengers.keys():
-                self.dict_passengers[p.destination] = [p]
+        if self.curr_capacity < MAX_CAP_ELEVATOR and floor.passenger_list != []:
+            if self.curr_capacity == 0:
+                closest_passenger = np.argmin([abs(p.destination - floor.value) for p in floor.passenger_list])
+                mov_dir = floor.passenger_list[closest_passenger].get_direction()
             else:
-                self.dict_passengers[p.destination].append(p)
-            print "loaded!"
-            del_list.append(i)
-            self.curr_capacity += 1
-            self.cumulative_cost += p.time ** 2 - p.time
-        temp = []
-        for i in xrange(len(floor.passenger_list)):
-            if i not in del_list:
-                temp.append(floor.passenger_list[i])
-        floor.passenger_list = temp
-        # reinitialize floor calls
-        floor.call = [0,0]
-        floor.update_call()
+                mov_dir = np.sign(self.dict_passengers.keys()[0] - floor.value)
+            for i, p in enumerate(floor.passenger_list):
+                if self.curr_capacity != MAX_CAP_ELEVATOR and p.get_direction() == mov_dir:
+                    if p.destination not in self.dict_passengers.keys():
+                        self.dict_passengers[p.destination] = [p]
+                    else:
+                        self.dict_passengers[p.destination].append(p)
+                    print "loaded!"
+                    del_list.append(i)
+                    self.curr_capacity += 1
+                    self.cumulative_cost += p.time ** 2 - p.time
+            temp = []
+            for i in xrange(len(floor.passenger_list)):
+                if i not in del_list:
+                    temp.append(floor.passenger_list[i])
+            floor.passenger_list = temp
+            # reinitialize floor calls
+            floor.call = [0,0]
+            floor.update_call()
         return floor
 
     def unload(self, floor):
@@ -95,6 +102,7 @@ class Elevator(object):
                 self.curr_capacity -= 1
                 total_time.append(p.time)
             self.dict_passengers.pop(floor.value, None)
+            print "unloaded!"
         return total_time
 
     def update(self):

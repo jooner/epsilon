@@ -75,13 +75,11 @@ def lqf_run(epoch=1):
         lqf_building = Building()
         lqf_env = Environment(lqf_building)
         #print "---------------------%d"%i
-        
+        lqf_env.get_state()
         while not lqf_env.is_done():
             #print lqf_env.total_pop
-
             action = lqf_controller(lqf_env)
             s, r, _ = lqf_env.step(action)
-
             #print "action = %s \t reward = %f"%(action, r)
 
         #scores.append(lqf_env.get_reward())
