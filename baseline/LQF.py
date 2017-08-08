@@ -14,7 +14,7 @@ import sys
 if "../" not in sys.path:
   sys.path.append("../")
 
-from epsilon.environment import Environment
+from epsilon.altenv import Environment
 from epsilon.building import Building
 from epsilon.globals import *
 
@@ -79,10 +79,12 @@ def lqf_run(epoch=1):
         while not lqf_env.is_done():
             #print lqf_env.total_pop
             lqf_env.populate() # populate the building
-            lqf_env.tic() # t += 1
+            print lqf_env.time
             action = lqf_controller(lqf_env)
             s, r, _ = lqf_env.step(action)
+
             #print "action = %s \t reward = %f"%(action, r)
+
         #scores.append(lqf_env.get_reward())
         lqf_env.update_global_time_list()
         avg_time = sum(lqf_env.global_time_list) / float(lqf_env.total_pop)

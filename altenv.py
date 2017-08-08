@@ -14,11 +14,13 @@ class Environment(object):
         self.global_time_list = []
         self.old_state = np.zeros([NUM_FLOORS, (MAX_CAP_ELEVATOR) + NUM_VALID_ACTIONS + 4 + 1])
         # 0.2 arrivals per sec over 7200 secs (2 hrs)
-        self.population_plan = np.random.poisson(0.3, TOTAL_SEC)
+        self.population_plan = np.random.poisson(0.2, TOTAL_SEC)
+        print self.population_plan
 
     def tic(self): # long live ke$ha
         # TODO: Make this faster without nested for loops
         self.time += 1
+        print "time! %d" %self.time
         self.populate()
         for floor in self.building.floors:
             for passenger in floor.passenger_list:
@@ -56,7 +58,7 @@ class Environment(object):
         self.tic() # progress global time by t += 1
         return (self.get_state(), self.get_reward(), self.is_done())
 
-    def is_done(self):
+    def is_done(self): # TODO
         return (self.time > TOTAL_SEC)
 
     def get_reward(self):
@@ -64,35 +66,21 @@ class Environment(object):
         reward -= sum([f.get_cost() for f in self.building.floors])
         return reward / float(1e8)
 
-        """
-        try:
-            return (-sum(self.global_time_list) / float(len(self.global_time_list))) /float(1e3)
-        except:
-            return 0
-        """
-
-    def get_state(self):
-        state = np.zeros([NUM_FLOORS, 4 + MAX_CAP_ELEVATOR + NUM_VALID_ACTIONS + 1])
+    def get_state(self):  # TODO
+        state = np.zeros((NUM_ELEVATORS * 2 + 1, NUM_FLOORS, NUM_FLOORS))
         for i, floor in enumerate(self.building.floors):
-            nonzero_idx = floor.call[0] + floor.call[1] * 2
-            state[i][nonzero_idx] = 1
+            for passenger in floor.passenger_list:
+                state[0, floor.value, passenger.destination] += 1
+        for j, elevator in enumerate(self.building.elevators):
+            for destination, passenger_list in elevator.dict_passengers.iteritems():
+                state[2*j+1, elevator.curr_floor, destination] += len(passenger_list)
+                state[2*j+2, elevator.curr_floor, destination] += sum([p.time for p in passenger_list])
+#        print state
+#        print "\n"
+        return state
 
-        for e_i, elevator in enumerate(self.building.elevators):
-            part_state = np.zeros((MAX_CAP_ELEVATOR) + NUM_VALID_ACTIONS + 1)
-            part_state[:elevator.curr_capacity] = [1] * elevator.curr_capacity
-            part_state[MAX_CAP_ELEVATOR:][elevator.move_direction+1] = 1
-            min_dist = NUM_FLOORS
-            for dest_flr in elevator.dict_passengers.keys():
-                min_dist = min(min_dist, abs(elevator.curr_floor - dest_flr))
-            part_state[-1] = min_dist
-            state[elevator.curr_floor][4:] = part_state
-        channeled_state = np.zeros((2, state.shape[0], state.shape[1]))
-        channeled_state[0, :, :] = self.old_state
-        channeled_state[1, :, :] = state
-        self.old_state = state
-        return channeled_state
 
-    def populate(self):
+    def populate(self):  # TODO
         """Populate passenger objects"""
         if self.time < TOTAL_SEC:
             new_pop = self.population_plan[self.time]
@@ -119,4 +107,3 @@ class Environment(object):
         building = Building()
         self.__init__(building)
         return self.get_state()
-

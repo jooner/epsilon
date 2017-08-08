@@ -14,7 +14,7 @@ class Environment(object):
         self.global_time_list = []
         self.old_state = np.zeros([NUM_FLOORS, (MAX_CAP_ELEVATOR) + NUM_VALID_ACTIONS + 4 + 1])
         # 0.2 arrivals per sec over 7200 secs (2 hrs)
-        self.population_plan = np.random.poisson(0.3, TOTAL_SEC)
+        self.population_plan = np.random.poisson(0.2, TOTAL_SEC)
 
     def tic(self): # long live ke$ha
         # TODO: Make this faster without nested for loops
