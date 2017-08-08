@@ -91,7 +91,7 @@ class Environment(object):
         channeled_state[0, :, :] = self.old_state
         channeled_state[1, :, :] = state
         self.old_state = state
-        return state
+        return channeled_state
 
     def populate(self):
         """Populate passenger objects"""
