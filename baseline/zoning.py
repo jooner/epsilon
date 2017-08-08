@@ -128,7 +128,6 @@ def zoning_run(epoch=1, zone_type="random"):
         zoning_env = Environment(building)
 
         while not zoning_env.is_done():
-            zoning_env.populate()
             action = zoning_controller(zoning_env)
             s, r, _ = zoning_env.step(action)
         zoning_env.update_global_time_list()

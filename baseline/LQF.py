@@ -75,11 +75,10 @@ def lqf_run(epoch=1):
         lqf_building = Building()
         lqf_env = Environment(lqf_building)
         #print "---------------------%d"%i
-
+        
         while not lqf_env.is_done():
             #print lqf_env.total_pop
-            lqf_env.populate() # populate the building
-            print lqf_env.time
+
             action = lqf_controller(lqf_env)
             s, r, _ = lqf_env.step(action)
 

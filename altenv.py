@@ -20,7 +20,6 @@ class Environment(object):
     def tic(self): # long live ke$ha
         # TODO: Make this faster without nested for loops
         self.time += 1
-        print "time! %d" %self.time
         self.populate()
         for floor in self.building.floors:
             for passenger in floor.passenger_list:
@@ -75,12 +74,12 @@ class Environment(object):
             for destination, passenger_list in elevator.dict_passengers.iteritems():
                 state[2*j+1, elevator.curr_floor, destination] += len(passenger_list)
                 state[2*j+2, elevator.curr_floor, destination] += sum([p.time for p in passenger_list])
-#        print state
-#        print "\n"
+        print state
+        print "\n"
         return state
 
 
-    def populate(self):  # TODO
+    def populate(self):
         """Populate passenger objects"""
         if self.time < TOTAL_SEC:
             new_pop = self.population_plan[self.time]
@@ -92,6 +91,7 @@ class Environment(object):
                                                range(passenger.start_floor + 1, NUM_FLOORS))
                 self.building.floors[passenger.start_floor].passenger_list.append(passenger)
                 self.building.floors[passenger.start_floor].update_call()
+                print "new person! {} {}".format(passenger.start_floor, passenger.destination)
 
     def update_global_time_list(self):
         # TODO: make this faster by removing nested for loop
