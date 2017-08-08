@@ -21,7 +21,7 @@ class Floor(object):
 
     def update_call(self):
         for passenger in self.passenger_list:
-            diff = passenger.start_floor - passenger.destination
+            diff = passenger.destination - passenger.start_floor
             if diff > 0:
                 self.call[1] = 1
             elif diff < 0:

@@ -44,8 +44,8 @@ class Estimator():
         Builds the Tensorflow graph.
         """
         # Placeholders for our input
-        a, b = self.s_dim
-        self.inputs = tf.placeholder(shape=[None, a,b], dtype=tf.float32)
+        a, b, c = self.s_dim
+        self.inputs = tf.placeholder(shape=[None, a,b,c], dtype=tf.float32)
         # The TD target value
         self.y_pl = tf.placeholder(shape=[None], dtype=tf.float32, name="y")
         # Integer id of which action was selected

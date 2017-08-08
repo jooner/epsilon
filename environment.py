@@ -12,8 +12,7 @@ class Environment(object):
         self.curr_pop = 0
         self.building = building
         self.global_time_list = []
-        self.old_state = np.zeros([NUM_FLOORS, (MAX_CAP_ELEVATOR + 1) + NUM_VALID_ACTIONS + 4 + 1])
-        self.old_old_state = np.zeros([NUM_FLOORS, (MAX_CAP_ELEVATOR + 1) + NUM_VALID_ACTIONS + 4 + 1])
+        self.old_state = np.zeros([NUM_FLOORS, (MAX_CAP_ELEVATOR) + NUM_VALID_ACTIONS + 4 + 1])
         # 0.2 arrivals per sec over 7200 secs (2 hrs)
         self.population_plan = np.random.poisson(0.3, TOTAL_SEC)
 
@@ -55,7 +54,7 @@ class Environment(object):
             self.building.elevators[i].move(elevator_action)
             self.building.elevators[i].update()
         self.tic() # progress global time by t += 1
-
+        print self.get_state(), self.get_reward()
         return (self.get_state(), self.get_reward(), self.is_done())
 
     def is_done(self):
@@ -74,27 +73,25 @@ class Environment(object):
         """
 
     def get_state(self):
-        state = np.zeros([NUM_FLOORS, (MAX_CAP_ELEVATOR + 1) + NUM_VALID_ACTIONS + 4 + 1])
+        state = np.zeros([NUM_FLOORS, 4 + MAX_CAP_ELEVATOR + NUM_VALID_ACTIONS + 1])
         for i, floor in enumerate(self.building.floors):
             nonzero_idx = floor.call[0] + floor.call[1] * 2
             state[i][nonzero_idx] = 1
 
-        must_stop_list = self.elevators_to_stop()
-
         for e_i, elevator in enumerate(self.building.elevators):
-            part_state = np.zeros((MAX_CAP_ELEVATOR + 1) + NUM_VALID_ACTIONS + 1)
+            part_state = np.zeros((MAX_CAP_ELEVATOR) + NUM_VALID_ACTIONS + 1)
             part_state[:elevator.curr_capacity] = [1] * elevator.curr_capacity
-            part_state[MAX_CAP_ELEVATOR+1:][elevator.move_direction+1] = 1
+            part_state[MAX_CAP_ELEVATOR:][elevator.move_direction+1] = 1
             min_dist = NUM_FLOORS
             for dest_flr in elevator.dict_passengers.keys():
                 min_dist = min(min_dist, abs(elevator.curr_floor - dest_flr))
             part_state[-1] = min_dist
             state[elevator.curr_floor][4:] = part_state
-        concat_state = np.concatenate((self.old_old_state, self.old_state), axis=1)
-        self.old_old_state = self.old_state
-        concat_state = np.concatenate((concat_state, state), axis=1)
+        channeled_state = np.zeros((2, state.shape[0], state.shape[1]))
+        channeled_state[0, :, :] = self.old_state
+        channeled_state[1, :, :] = state
         self.old_state = state
-        return concat_state
+        return state
 
     def populate(self):
         """Populate passenger objects"""
