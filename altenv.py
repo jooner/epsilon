@@ -119,3 +119,4 @@ class Environment(object):
         building = Building()
         self.__init__(building)
         return self.get_state()
+
