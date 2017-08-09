@@ -24,6 +24,21 @@ def copy_model_parameters(sess, estimator1, estimator2):
 
     sess.run(update_ops)
 
+# change a decimal value to ternary representation
+def dec2tern_str(n):
+    if n == 0:
+        return '0' * NUM_ELEVATORS
+    nums = []
+    while n:
+        n , r = divmod(n,3)
+        nums.append(str(r))
+    res = ''.join(reversed(nums))
+    if len(res) == NUM_ELEVATORS:
+        return res
+    else:
+        prefix = '0' * (NUM_ELEVATORS - len(res))
+        res = ''.join([prefix, res])
+        return res
 
 def make_epsilon_greedy_policy(estimator, nA):
     """
@@ -38,12 +53,15 @@ def make_epsilon_greedy_policy(estimator, nA):
         the probabilities for each action in the form of a numpy array of length nA.
 
     """
+    ## NOTE modified
     def policy_fn(sess, observation, epsilon):
         A = np.ones(nA, dtype=float) * epsilon / nA
         q_values = estimator.predict(sess, np.expand_dims(observation, 0))[0]
         best_action_idx = np.argmax(q_values)
-        ba = best_action_idx
         act_per_elevator = []
+        A[best_action_idx] += (1.0 - epsilon)
+
+        """
         for i in range(NUM_ELEVATORS):
             sp = NUM_VALID_ACTIONS ** (NUM_ELEVATORS - i - 1)
             count = 0
@@ -53,6 +71,7 @@ def make_epsilon_greedy_policy(estimator, nA):
             act_per_elevator.append(count)
         for i, a in enumerate(act_per_elevator):
             A[i * NUM_VALID_ACTIONS + a] += (1.0 - epsilon)
+        """
         return A
     return policy_fn
 
@@ -136,9 +155,13 @@ def deep_q_learning(sess,
 
     # The policy we're following
     policy = make_epsilon_greedy_policy(
-        q_estimator, NUM_VALID_ACTIONS * NUM_ELEVATORS)
+        q_estimator, NUM_VALID_ACTIONS ** NUM_ELEVATORS)
 
+    ## NOTE modified
     def get_action(action_probs):
+        idx = np.random.choice(np.arange(len(action_probs)), p=action_probs)
+        action = [int(x)-1 for x in list(dec2tern_str(idx))]
+        """
         action = []
         for i in range(NUM_ELEVATORS):
             i *= NUM_VALID_ACTIONS
@@ -146,6 +169,7 @@ def deep_q_learning(sess,
             act_p = action_probs[i:i+NUM_VALID_ACTIONS] / ss
             act = np.random.choice(np.arange(NUM_VALID_ACTIONS), p=act_p) - 1
             action.append(act)
+        """
         return action
 
     # Populate the replay memory with initial experience

@@ -34,14 +34,14 @@ with tf.Session() as sess:
                                     q_estimator=q_estimator,
                                     target_estimator=target_estimator,
                                     experiment_dir=experiment_dir,
-                                    num_episodes=1000,
+                                    num_episodes=5000,
                                     replay_memory_size=1000,
-                                    replay_memory_init_size=100,
-                                    update_target_estimator_every=100,
+                                    replay_memory_init_size=500,
+                                    update_target_estimator_every=1000,
                                     epsilon_start=1.0,
                                     epsilon_end=0.1,
-                                    epsilon_decay_steps=50000,
+                                    epsilon_decay_steps=100000,
                                     discount_factor=0.99,
-                                    batch_size=2):
+                                    batch_size=3):
 
         print "Episode {}\t  Reward: {}\t Episode AvgWaitTime: {}".format(num_ep, stats.episode_rewards[-1], avg_t)

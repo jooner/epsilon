@@ -40,7 +40,7 @@ class Environment(object):
 
     def step(self, a):
         """
-        Input: action [E1, E2, E3] where En is one of 1,0,-1
+        Input: action [E1, E2, E3] where En is one of 1,0,-1, and n is the number of elevators
         Returns: next state and reward
         """
         assert len(a) == len(self.building.elevators)
@@ -72,10 +72,10 @@ class Environment(object):
         """
 
     def get_state(self):
-        state = np.zeros([NUM_FLOORS, 4 + MAX_CAP_ELEVATOR + NUM_VALID_ACTIONS + 1])
+        state = np.zeros((NUM_FLOORS, 4 + MAX_CAP_ELEVATOR + NUM_VALID_ACTIONS + 1))
         for i, floor in enumerate(self.building.floors):
             nonzero_idx = floor.call[0] + floor.call[1] * 2
-            state[i][nonzero_idx] = 1
+            state[i, nonzero_idx] = 1
 
         for e_i, elevator in enumerate(self.building.elevators):
             part_state = np.zeros((MAX_CAP_ELEVATOR) + NUM_VALID_ACTIONS + 1)
