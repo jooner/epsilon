@@ -92,7 +92,7 @@ def deep_q_learning(sess,
                     batch_size=32,
                     record_video_every=50):
 
-    EpisodeStats = namedtuple("Stats",["episode_lengths", "episode_rewards"])
+    EpisodeStats = namedtuple("Stats",["episode_lengths", "episode_rewards", "episode_avg_wait"])
     """
     Q-Learning algorithm for fff-policy TD control using Function Approximation.
     Finds the optimal greedy policy while following an epsilon-greedy policy.
@@ -129,7 +129,9 @@ def deep_q_learning(sess,
     # Keeps track of useful statistics
     stats = EpisodeStats(
         episode_lengths=np.zeros(num_episodes),
-        episode_rewards=np.zeros(num_episodes))
+        episode_rewards=np.zeros(num_episodes),
+        episode_avg_wait=np.zeros(num_episodes))
+
 
     # Create directories for checkpoints and summaries
     checkpoint_dir = os.path.join(experiment_dir, "checkpoints")
@@ -275,17 +277,25 @@ def deep_q_learning(sess,
 
         env.update_global_time_list()
         avg_time = sum(env.global_time_list) / float(len(env.global_time_list))
+        stats.episode_avg_wait[i_episode] = avg_time
 
+        # Show average reward for the last few episodes
+        """
+        if i_episode % 100 == 0 and i_episode != 0:
+            print stats.episode_avg_wait
+            print("==== Average Reward for the last 100 episodes = {}\n==== Average Wait Time for the last 100 episodes = {}".format(np.mean(stats.episode_rewards[-100:i_episode]), np.mean(stats.episode_avg_wait[-100:i_episode])))
+        """
         # Add summaries to tensorboard
         episode_summary = tf.Summary()
         episode_summary.value.add(simple_value=stats.episode_rewards[i_episode], node_name="episode_reward", tag="episode_reward")
         episode_summary.value.add(simple_value=stats.episode_lengths[i_episode], node_name="episode_length", tag="episode_length")
-        episode_summary.value.add(simple_value=avg_time, node_name="average_wait", tag="average_wait")
+        episode_summary.value.add(simple_value=stats.episode_avg_wait[i_episode], node_name="episode_avg_wait", tag="episode_avg_wait")
         q_estimator.summary_writer.add_summary(episode_summary, total_t)
         q_estimator.summary_writer.flush()
 
         yield total_t, i_episode, EpisodeStats(
             episode_lengths=stats.episode_lengths[:i_episode+1],
-            episode_rewards=stats.episode_rewards[:i_episode+1]), avg_time
+            episode_rewards=stats.episode_rewards[:i_episode+1],
+            episode_avg_wait=stats.episode_avg_wait[:i_episode+1])
 
     return
