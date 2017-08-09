@@ -37,7 +37,7 @@ with tf.Session() as sess:
                                             num_episodes=5000,
                                             replay_memory_size=1000,
                                             replay_memory_init_size=500,
-                                            update_target_estimator_every=1000,
+                                            update_target_estimator_every=2000,
                                             epsilon_start=1.0,
                                             epsilon_end=0.1,
                                             epsilon_decay_steps=100000,
@@ -45,5 +45,5 @@ with tf.Session() as sess:
                                             batch_size=3):
 
         print "Episode {}\t  Reward: {}\t Episode AvgWaitTime: {}".format(num_ep, stats.episode_rewards[-1], stats.episode_avg_wait[-1])
-        if num_ep % 10 == 0 and num_ep != 0:
+        if num_ep % 100 == 0 and num_ep != 0:
             print "=== Average Reward of Last 100 Episodes = {}\n=== Average AvgWaitTime of Last 100 Episodes = {}".format(np.mean(stats.episode_rewards[-100:]), np.mean(stats.episode_avg_wait[-100:]))

@@ -214,7 +214,7 @@ def deep_q_learning(sess,
             # Maybe update the target estimator
             if total_t % update_target_estimator_every == 0:
                 copy_model_parameters(sess, q_estimator, target_estimator)
-            #    print "Copied model parameters to target network."
+                #print "Copied model parameters to target network."
 
             # Print out which step we're on, useful for debugging.
             #print "Step {} ({}) @ Episode {}/{}, loss: {}".format(t, total_t, i_episode + 1, num_episodes, loss)
