@@ -13,7 +13,7 @@ tf.reset_default_graph()
 
 # Where we save our checkpoints and graphs
 ts = time.time()
-st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+st = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S')
 experiment_dir = os.path.abspath("./experiments/{}".format(st))
 
 # Create a glboal step variable
@@ -45,3 +45,5 @@ with tf.Session() as sess:
                                             batch_size=3):
 
         print "Episode {}\t  Reward: {}\t Episode AvgWaitTime: {}".format(num_ep, stats.episode_rewards[-1], stats.episode_avg_wait[-1])
+        if num_ep % 10 == 0 and num_ep != 0:
+            print "=== Average Reward of Last 100 Episodes = {}\n=== Average AvgWaitTime of Last 100 Episodes = {}".format(np.mean(stats.episode_rewards[-100:]), np.mean(stats.episode_avg_wait[-100:]))

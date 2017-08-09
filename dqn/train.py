@@ -24,13 +24,14 @@ def copy_model_parameters(sess, estimator1, estimator2):
 
     sess.run(update_ops)
 
+## NOTE:
 # change a decimal value to ternary representation
 def dec2tern_str(n):
     if n == 0:
         return '0' * NUM_ELEVATORS
     nums = []
     while n:
-        n , r = divmod(n,3)
+        n , r = divmod(n,NUM_VALID_ACTIONS)
         nums.append(str(r))
     res = ''.join(reversed(nums))
     if len(res) == NUM_ELEVATORS:
@@ -39,6 +40,12 @@ def dec2tern_str(n):
         prefix = '0' * (NUM_ELEVATORS - len(res))
         res = ''.join([prefix, res])
         return res
+
+# converts action vector [e1, e2, .., en] to indices in NUM_VALID_ACTION ** NUM_ELEV vector
+def action_vec2index(action):
+    mul = np.flip(3 ** np.arange(NUM_ELEVATORS), 0)
+    aa = np.array([x+1 for x in action])
+    return np.sum(aa * mul)
 
 def make_epsilon_greedy_policy(estimator, nA):
     """
@@ -136,12 +143,9 @@ def deep_q_learning(sess,
     # Create directories for checkpoints and summaries
     checkpoint_dir = os.path.join(experiment_dir, "checkpoints")
     checkpoint_path = os.path.join(checkpoint_dir, "model")
-    monitor_path = os.path.join(experiment_dir, "monitor")
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    if not os.path.exists(monitor_path):
-        os.makedirs(monitor_path)
 
     saver = tf.train.Saver()
     # Load a previous checkpoint if we find one
@@ -216,8 +220,8 @@ def deep_q_learning(sess,
             #print "Step {} ({}) @ Episode {}/{}, loss: {}".format(t, total_t, i_episode + 1, num_episodes, loss)
             #sys.stdout.flush()
 
-            # Populate the environment
-            env.tic()
+            # TODO: when should be populate? Populate the environment
+            # env.populate()
 
             # Take a step
             action_probs = policy(sess, state, epsilon)
@@ -238,12 +242,18 @@ def deep_q_learning(sess,
             # Sample a minibatch from the replay memory
             samples = random.sample(replay_memory, batch_size)
             states_batch, action_batch, reward_batch, next_states_batch, done_batch = map(np.array, zip(*samples))
+            
+            """
             action_batch += 1
             indices = []
             for b_idx in range(batch_size):
                 indices.append(sum([(NUM_VALID_ACTIONS ** (NUM_ELEVATORS-i-1)) * a \
                                for i, a in enumerate(action_batch[b_idx])]))
             action_batch = indices
+            """
+            # convert action_batch in the form of indices from batch of vectors.
+            action_batch = [action_vec2index(a) for a in action_batch]
+
             # Calculate q values and targets (Double DQN)
             # aligned in batch sizes
             q_values_next = q_estimator.predict(sess, next_states_batch)
@@ -278,13 +288,7 @@ def deep_q_learning(sess,
         env.update_global_time_list()
         avg_time = sum(env.global_time_list) / float(len(env.global_time_list))
         stats.episode_avg_wait[i_episode] = avg_time
-
-        # Show average reward for the last few episodes
-        """
-        if i_episode % 100 == 0 and i_episode != 0:
-            print stats.episode_avg_wait
-            print("==== Average Reward for the last 100 episodes = {}\n==== Average Wait Time for the last 100 episodes = {}".format(np.mean(stats.episode_rewards[-100:i_episode]), np.mean(stats.episode_avg_wait[-100:i_episode])))
-        """
+        
         # Add summaries to tensorboard
         episode_summary = tf.Summary()
         episode_summary.value.add(simple_value=stats.episode_rewards[i_episode], node_name="episode_reward", tag="episode_reward")
