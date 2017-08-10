@@ -1,5 +1,6 @@
 from dqn import *
 from collections import namedtuple
+from epsilon.mcts_env import MCTSWorldTree
 
 VALID_ACTIONS = [-1, 0, 1]
 
@@ -60,26 +61,15 @@ def make_epsilon_greedy_policy(estimator, nA):
         the probabilities for each action in the form of a numpy array of length nA.
 
     """
-    ## NOTE modified
+
     def policy_fn(sess, observation, epsilon):
         A = np.ones(nA, dtype=float) * epsilon / nA
         q_values = estimator.predict(sess, np.expand_dims(observation, 0))[0]
         best_action_idx = np.argmax(q_values)
         act_per_elevator = []
         A[best_action_idx] += (1.0 - epsilon)
-
-        """
-        for i in range(NUM_ELEVATORS):
-            sp = NUM_VALID_ACTIONS ** (NUM_ELEVATORS - i - 1)
-            count = 0
-            while best_action_idx > sp:
-                best_action_idx -= sp
-                count += 1
-            act_per_elevator.append(count)
-        for i, a in enumerate(act_per_elevator):
-            A[i * NUM_VALID_ACTIONS + a] += (1.0 - epsilon)
-        """
         return A
+
     return policy_fn
 
 # determinisic version of the policy
@@ -138,7 +128,6 @@ def deep_q_learning(sess,
     """
 
     Transition = namedtuple("Transition", ["state", "action", "reward", "next_state", "done"])
-
     # The replay memory
     replay_memory = []
 
@@ -174,20 +163,10 @@ def deep_q_learning(sess,
     policy = make_epsilon_greedy_policy_det(
         q_estimator, NUM_VALID_ACTIONS ** NUM_ELEVATORS)
 
-    ## NOTE modified
     def get_action(action_probs):
         idx = np.random.choice(np.arange(len(action_probs)), p=action_probs)
         action = [int(x)-1 for x in list(dec2tern_str(idx))]
         assert len(action) == NUM_ELEVATORS
-        """
-        action = []
-        for i in range(NUM_ELEVATORS):
-            i *= NUM_VALID_ACTIONS
-            ss = action_probs[i:i+NUM_VALID_ACTIONS].sum(axis=0)
-            act_p = action_probs[i:i+NUM_VALID_ACTIONS] / ss
-            act = np.random.choice(np.arange(NUM_VALID_ACTIONS), p=act_p) - 1
-            action.append(act)
-        """
         return action
 
     # Populate the replay memory with initial experience
@@ -210,13 +189,18 @@ def deep_q_learning(sess,
 
         # Reset the environment
         state = env.reset()
+        dream = env
         loss = None
-
+        # Monte Carlo Tree Search
+        # step 1: make a new tree every new episode
+        world_tree = MCTSWorldTree(dream.get_state(), dream.get_reward())
         # One step in the environment
+
         for t in itertools.count():
 
             # Epsilon for this time step
             epsilon = epsilons[min(total_t, epsilon_decay_steps-1)]
+
 
             # Add epsilon to Tensorboard
             episode_summary = tf.Summary()
@@ -232,11 +216,18 @@ def deep_q_learning(sess,
             #print "Step {} ({}) @ Episode {}/{}, loss: {}".format(t, total_t, i_episode + 1, num_episodes, loss)
             #sys.stdout.flush()
 
+            # MCTS step 2: from the current state, explore by unrolling actions
+            # we do this by hallucinating an action, by using perform
+            # which expands the tree nodes. s->a->s'& r
+            # MCTS step 3: MCTS returns action with highest reward from backtrack
+            # MCTS step 4:
+            # print world_tree.perform()
+
+
             # Take a step
             action_probs = policy(sess, state, epsilon)
             action = get_action(action_probs)
             next_state, reward, done = env.step(action)
-
             # If our replay memory is full, pop the first element
             if len(replay_memory) == replay_memory_size:
                 replay_memory.pop(0)
