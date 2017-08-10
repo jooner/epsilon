@@ -19,7 +19,6 @@ class Environment(object):
 
     def tic(self): # long live ke$ha
         # TODO: Make this faster without nested for loops
-        self.time += 1
         #self.populate()
         for floor in self.building.floors:
             for passenger in floor.passenger_list:
@@ -28,6 +27,7 @@ class Environment(object):
             for _, v in elevator.dict_passengers.iteritems():
                 for passenger in v:
                     passenger.time += 1
+        self.time += 1
 
     def elevators_to_stop(self):
         # returns a list of elevator indices that need to stop
@@ -57,7 +57,7 @@ class Environment(object):
         self.tic() # progress global time by t += 1
         return (self.get_state(), self.get_reward(), self.is_done())
 
-    def is_done(self): # TODO
+    def is_done(self):
         return (self.time > TOTAL_SEC)
 
     def get_reward(self):
@@ -65,7 +65,7 @@ class Environment(object):
         reward -= sum([f.get_cost() for f in self.building.floors])
         return reward / float(1e8)
 
-    def get_state(self):  # TODO
+    def get_state(self):
         state = np.zeros((NUM_ELEVATORS * 2 + 1, NUM_FLOORS, NUM_FLOORS))
         for i, floor in enumerate(self.building.floors):
             for passenger in floor.passenger_list:
@@ -77,7 +77,7 @@ class Environment(object):
         return state
 
 
-    def populate(self):  # TODO
+    def populate(self): 
         """Populate passenger objects. Hard Code the numbers. yay.
         Experiments should be run with num_floor = 3, num_elev = 2, cap = 2."""
 #        self.state = np.zeros((NUM_FLOORS, NUM_FLOORS, 2))

@@ -82,6 +82,18 @@ def make_epsilon_greedy_policy(estimator, nA):
         return A
     return policy_fn
 
+# determinisic version of the policy
+def make_epsilon_greedy_policy_det(estimator, nA):
+    def policy_fn(sess, observation, epsilon):
+        A = np.zeros(nA, dtype=float)
+        if np.random.random() < epsilon:
+            idx = np.random.randint(nA)
+        else:
+            q_values = estimator.predict(sess, np.expand_dims(observation, 0))[0]
+            idx = np.argmax(q_values)
+        A[idx] = 1.0
+        return A
+    return policy_fn
 
 def deep_q_learning(sess,
                     env,
@@ -96,9 +108,7 @@ def deep_q_learning(sess,
                     epsilon_start=1.0,
                     epsilon_end=0.1,
                     epsilon_decay_steps=500000,
-                    batch_size=32,
-                    record_video_every=50):
-
+                    batch_size=32):
     EpisodeStats = namedtuple("Stats",["episode_lengths", "episode_rewards", "episode_avg_wait"])
     """
     Q-Learning algorithm for fff-policy TD control using Function Approximation.
@@ -122,7 +132,6 @@ def deep_q_learning(sess,
         epsilon_end: The final minimum value of epsilon after decaying is done
         epsilon_decay_steps: Number of steps to decay epsilon over
         batch_size: Size of batches to sample from the replay memory
-        record_video_every: Record a video every N episodes
 
     Returns:
         An EpisodeStats object with two numpy arrays for episode_lengths and episode_rewards.
@@ -160,7 +169,9 @@ def deep_q_learning(sess,
     epsilons = np.linspace(epsilon_start, epsilon_end, epsilon_decay_steps)
 
     # The policy we're following
-    policy = make_epsilon_greedy_policy(
+    #policy = make_epsilon_greedy_policy(
+    #    q_estimator, NUM_VALID_ACTIONS ** NUM_ELEVATORS)
+    policy = make_epsilon_greedy_policy_det(
         q_estimator, NUM_VALID_ACTIONS ** NUM_ELEVATORS)
 
     ## NOTE modified
@@ -264,19 +275,7 @@ def deep_q_learning(sess,
             # Perform gradient descent update
             states_batch = np.array(states_batch)
             loss = q_estimator.update(sess, states_batch, action_batch, targets_batch)
-            """
-            if t % 400 == 0:
-                print "q_values_next"
-                print q_values_next
-                print best_actions
-                print "q_values_next_target"
-                #print q_values_next_target
-                #print next_states_batch
-                print "target_batch"
-                print targets_batch
-                print states_batch
-                print "LOSS %f" %loss
-            """
+
             if done:
                 break
 

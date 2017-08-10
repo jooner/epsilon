@@ -60,9 +60,7 @@ class Estimator():
         flattened = tf.contrib.layers.flatten(conv3)
         # Fully connected layers with RELU
         fc1 = tf.contrib.layers.fully_connected(flattened, 512)
-        fc2 = tf.contrib.layers.fully_connected(fc1, 512)
-        fc3 = tf.contrib.layers.fully_connected(fc2, 512, activation_fn=None)
-        self.predictions = tf.contrib.layers.fully_connected(fc3, self.a_dim, activation_fn=None)
+        self.predictions = tf.contrib.layers.fully_connected(fc1, self.a_dim)
         self.action_predictions = tf.gather(tf.reshape(self.predictions, [-1]), self.actions_pl)
 
         # Calcualte the loss
@@ -70,7 +68,7 @@ class Estimator():
         self.loss = tf.reduce_mean(self.losses)
 
         # Optimizer Parameters from original paper
-        self.optimizer = tf.train.RMSPropOptimizer(learning_rate=0.00025,
+        self.optimizer = tf.train.RMSPropOptimizer(learning_rate=0.0001,
                                                    decay=0.99,
                                                    momentum=0.0,
                                                    epsilon=1e-6)
@@ -82,7 +80,8 @@ class Estimator():
             tf.summary.scalar("loss", self.loss),
             tf.summary.histogram("loss_hist", self.losses),
             tf.summary.histogram("q_values_hist", self.predictions),
-            tf.summary.scalar("max_q_value", tf.reduce_max(self.predictions))
+            tf.summary.scalar("max_q_value", tf.reduce_max(self.predictions)),
+            tf.summary.scalar("avg_q_value", tf.reduce_mean(self.predictions))
         ])
 
 

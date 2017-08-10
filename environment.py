@@ -18,7 +18,7 @@ class Environment(object):
 
     def tic(self): # long live ke$ha
         # TODO: Make this faster without nested for loops
-        self.time += 1
+        #self.time += 1
         self.populate()
         for floor in self.building.floors:
             for passenger in floor.passenger_list:
@@ -27,6 +27,7 @@ class Environment(object):
             for _, v in elevator.dict_passengers.iteritems():
                 for passenger in v:
                     passenger.time += 1
+        self.time += 1
 
     def elevators_to_stop(self):
         # returns a list of elevator indices that need to stop
