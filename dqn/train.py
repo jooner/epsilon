@@ -167,6 +167,7 @@ def deep_q_learning(sess,
     def get_action(action_probs):
         idx = np.random.choice(np.arange(len(action_probs)), p=action_probs)
         action = [int(x)-1 for x in list(dec2tern_str(idx))]
+        assert len(action) == NUM_ELEVATORS
         """
         action = []
         for i in range(NUM_ELEVATORS):
@@ -220,9 +221,6 @@ def deep_q_learning(sess,
             #print "Step {} ({}) @ Episode {}/{}, loss: {}".format(t, total_t, i_episode + 1, num_episodes, loss)
             #sys.stdout.flush()
 
-            # TODO: when should be populate? Populate the environment
-            # env.populate()
-
             # Take a step
             action_probs = policy(sess, state, epsilon)
             action = get_action(action_probs)
@@ -242,7 +240,7 @@ def deep_q_learning(sess,
             # Sample a minibatch from the replay memory
             samples = random.sample(replay_memory, batch_size)
             states_batch, action_batch, reward_batch, next_states_batch, done_batch = map(np.array, zip(*samples))
-            
+
             """
             action_batch += 1
             indices = []
@@ -288,7 +286,7 @@ def deep_q_learning(sess,
         env.update_global_time_list()
         avg_time = sum(env.global_time_list) / float(len(env.global_time_list))
         stats.episode_avg_wait[i_episode] = avg_time
-        
+
         # Add summaries to tensorboard
         episode_summary = tf.Summary()
         episode_summary.value.add(simple_value=stats.episode_rewards[i_episode], node_name="episode_reward", tag="episode_reward")
