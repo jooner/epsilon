@@ -78,7 +78,7 @@ class Environment(object):
             for destination, passenger_list in elevator.dict_passengers.iteritems():
                 state[elevator.curr_floor, destination, 2*j+2] += len(passenger_list)
                 state[elevator.curr_floor, destination, 2*j+3] += sum([p.time for p in passenger_list])
-        concat_state = np.concatenate((self.old_state, state))
+        concat_state = np.concatenate((self.old_state, state), axis=2)
         self.old_state = state
         return concat_state
 
