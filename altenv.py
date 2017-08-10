@@ -64,7 +64,7 @@ class Environment(object):
     def get_reward(self):
         reward = -sum([e.cumulative_cost for e in self.building.elevators])
         reward -= sum([f.get_cost() for f in self.building.floors])
-        return reward / float(1e8)
+        return reward / float(1e5)
 
     def get_state(self):
         state = np.zeros((NUM_FLOORS, NUM_FLOORS, NUM_ELEVATORS * 2 + 2))
