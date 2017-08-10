@@ -12,12 +12,11 @@ class Environment(object):
         self.curr_pop = 0
         self.building = building
         self.global_time_list = []
-        self.old_state = np.zeros([NUM_FLOORS, (MAX_CAP_ELEVATOR) + NUM_VALID_ACTIONS + 4 + 1])
         self.populate()
         # 0.2 arrivals per sec over 7200 secs (2 hrs)
         #self.population_plan = np.random.poisson(0.2, TOTAL_SEC)
 
-    def tic(self): # long live ke$ha
+    def tic(self):
         # TODO: Make this faster without nested for loops
         self.time += 1
         #self.populate()
@@ -55,9 +54,11 @@ class Environment(object):
             self.building.elevators[i].move(elevator_action)
             self.building.elevators[i].update()
         self.tic() # progress global time by t += 1
+
+
         return (self.get_state(), self.get_reward(), self.is_done())
 
-    def is_done(self): # TODO
+    def is_done(self):
         return (self.time > TOTAL_SEC)
 
     def get_reward(self):
@@ -65,19 +66,21 @@ class Environment(object):
         reward -= sum([f.get_cost() for f in self.building.floors])
         return reward / float(1e8)
 
-    def get_state(self):  # TODO
-        state = np.zeros((NUM_ELEVATORS * 2 + 1, NUM_FLOORS, NUM_FLOORS))
+    def get_state(self):
+        state = np.zeros((NUM_FLOORS, NUM_FLOORS, NUM_ELEVATORS * 2 + 2))
         for i, floor in enumerate(self.building.floors):
             for passenger in floor.passenger_list:
-                state[0, floor.value, passenger.destination] += 1
+                state[floor.value, passenger.destination, 0] += 1
+            for passenger in floor.passenger_list:
+                state[floor.value, passenger.destination, 1] += passenger.time
         for j, elevator in enumerate(self.building.elevators):
             for destination, passenger_list in elevator.dict_passengers.iteritems():
-                state[2*j+1, elevator.curr_floor, destination] += len(passenger_list)
-                state[2*j+2, elevator.curr_floor, destination] += sum([p.time for p in passenger_list])
+                state[elevator.curr_floor, destination, 2*j+2] += len(passenger_list)
+                state[elevator.curr_floor, destination, 2*j+3] += sum([p.time for p in passenger_list])
         return state
 
 
-    def populate(self):  # TODO
+    def populate(self):
         """Populate passenger objects. Hard Code the numbers. yay.
         Experiments should be run with num_floor = 3, num_elev = 2, cap = 2."""
 #        self.state = np.zeros((NUM_FLOORS, NUM_FLOORS, 2))
