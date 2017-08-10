@@ -253,10 +253,10 @@ class StateNode(Node):
         self.state = state
         self.reward = reward
         # hard-code possible actions for now
-        actions = [np.asarray([-1,-1]), np.asarray([-1,0]), np.asarray([-1,1]),
+        self.actions = [np.asarray([-1,-1]), np.asarray([-1,0]), np.asarray([-1,1]),
                    np.asarray([0,-1]), np.asarray([0,0]), np.asarray([0,1]),
                    np.asarray([1,-1]), np.asarray([1,0]), np.asarray([1,1])]
-        for action in actions:
+        for action in self.actions:
             self.children[tuple(action)] = ActionNode(self, action)
 
     @property

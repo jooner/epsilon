@@ -12,6 +12,7 @@ class Environment(object):
         self.curr_pop = 0
         self.building = building
         self.global_time_list = []
+        self.old_state = np.zeros((NUM_FLOORS, NUM_FLOORS, NUM_ELEVATORS * 2 + 2))
         self.populate()
         # 0.2 arrivals per sec over 7200 secs (2 hrs)
         #self.population_plan = np.random.poisson(0.2, TOTAL_SEC)
@@ -77,7 +78,9 @@ class Environment(object):
             for destination, passenger_list in elevator.dict_passengers.iteritems():
                 state[elevator.curr_floor, destination, 2*j+2] += len(passenger_list)
                 state[elevator.curr_floor, destination, 2*j+3] += sum([p.time for p in passenger_list])
-        return state
+        concat_state = np.concatenate((self.old_state, state))
+        self.old_state = state
+        return concat_state
 
 
     def populate(self):
