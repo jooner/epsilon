@@ -49,7 +49,10 @@ class Environment(object):
         for i, elevator_action in enumerate(a):
             if elevator_action == 0:
                 flr = self.building.elevators[i].curr_floor
+                k = len(self.global_time_list)
                 self.global_time_list.extend(self.building.elevators[i].unload(self.building.floors[flr]))
+                if k != len(self.global_time_list):
+                    print self.global_time_list
                 self.building.floors[flr] = self.building.elevators[i].load(self.building.floors[flr])
 
             #print elevator_action

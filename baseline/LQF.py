@@ -71,26 +71,30 @@ def lqf_controller(env):
 
 def lqf_run(epoch=1):
     result = 0
+    rewards = []
     for i in range(epoch):
         lqf_building = Building()
         lqf_env = Environment(lqf_building)
         #print "---------------------%d"%i
         lqf_env.get_state()
+        episode_reward = 0
         while not lqf_env.is_done():
             #print lqf_env.total_pop
             action = lqf_controller(lqf_env)
             s, r, _ = lqf_env.step(action)
+            episode_reward += r
             #print "action = %s \t reward = %f"%(action, r)
-
         #scores.append(lqf_env.get_reward())
         lqf_env.update_global_time_list()
+        rewards.append(episode_reward)
         avg_time = sum(lqf_env.global_time_list) / float(lqf_env.total_pop)
         result += avg_time
-    return result / float(epoch)
+    return result / float(epoch), float(sum(rewards)) / len(rewards)
 
 def lqf_main():
-    average_score = lqf_run(epoch=NUM_EPOCHS)
+    average_score, avg_reward = lqf_run(epoch=NUM_EPOCHS)
     print("[LQF Baseline]\t\tAverage Score: {} over {} Epochs".format(average_score, NUM_EPOCHS))
+    print("[LQF Baseline]\t\tAverage Reward: {} over {} Epochs".format(avg_reward, NUM_EPOCHS))
 
 if __name__ == "__main__":
     lqf_main()

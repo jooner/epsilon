@@ -100,7 +100,7 @@ class Estimator():
         self.loss = tf.reduce_mean(self.losses)
 
         # Optimizer Parameters from original paper
-        self.optimizer = tf.train.RMSPropOptimizer(learning_rate=0.0001,
+        self.optimizer = tf.train.RMSPropOptimizer(learning_rate=0.00001,
                                                    decay=0.99,
                                                    momentum=0.0,
                                                    epsilon=1e-6)

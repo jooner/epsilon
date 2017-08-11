@@ -78,7 +78,7 @@ class Elevator(object):
                         self.dict_passengers[p.destination].append(p)
                     del_list.append(i)
                     self.curr_capacity += 1
-                    self.cumulative_cost += p.time ** 2 - p.time
+                    self.cumulative_cost += p.time ** 2
             temp = []
             for i in xrange(len(floor.passenger_list)):
                 if i not in del_list:
@@ -97,7 +97,7 @@ class Elevator(object):
         if floor.value in self.dict_passengers.keys():
             for p in self.dict_passengers[floor.value]:
                 # reward when unloading person
-                self.cumulative_cost -= p.time ** 2 + p.time
+                self.cumulative_cost -= p.time ** 2
                 self.curr_capacity -= 1
                 total_time.append(p.time)
             self.dict_passengers.pop(floor.value, None)
