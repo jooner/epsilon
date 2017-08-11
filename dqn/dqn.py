@@ -53,21 +53,23 @@ class Estimator():
         # X = tf.expand_dims(tf.to_float(self.inputs),-1)
         initializer = tf.contrib.layers.xavier_initializer()
         # 1st conv layer
-        kernel_1 = tf.get_variable('kernel_1', shape=[3,2,2,2,8],
+        kernel_1 = tf.get_variable('kernel_1', shape=[3,2,2,3,8],
                                     dtype=tf.float32, initializer=initializer)
         bias_1 = tf.get_variable('bias_1', shape=[8], dtype=tf.float32, initializer=initializer)
-        conv1 = tf.nn.conv3d(self.inputs, filter=kernel_1, strides=[1,1,1,1,1], padding='SAME')
+        conv1 = tf.nn.conv3d(self.inputs, filter=kernel_1, strides=[1,2,2,2,1], padding='SAME')
         conv1 = tf.nn.bias_add(conv1, bias_1)
         conv1 = tf.nn.relu(conv1, name='relu_1')
         pool1 = tf.nn.max_pool3d(conv1, ksize=[1,2,2,2,1], strides=[1,2,2,2,1], padding='SAME')
+
         # 2nd conv layer
-        kernel_2 = tf.get_variable('kernel_2', shape=[3,2,2,8,16],
+        kernel_2 = tf.get_variable('kernel_2', shape=[2,2,2,8,8],
                                     dtype=tf.float32, initializer=initializer)
-        bias_2 = tf.get_variable('bias_2', shape=[16], dtype=tf.float32, initializer=initializer)
+        bias_2 = tf.get_variable('bias_2', shape=[8], dtype=tf.float32, initializer=initializer)
         conv2 = tf.nn.conv3d(pool1, filter=kernel_2, strides=[1,1,1,1,1], padding='SAME')
         conv2 = tf.nn.bias_add(conv2, bias_2)
         conv2 = tf.nn.relu(conv2, name='relu_2')
-        pool2 = tf.nn.max_pool3d(conv2, ksize=[1,2,2,2,1], strides=[1,2,2,2,1], padding='SAME')
+        # pool2 = tf.nn.max_pool3d(conv2, ksize=[1,2,2,2,1], strides=[1,2,2,2,1], padding='SAME')
+        """
         # 3rd conv layer
         kernel_3 = tf.get_variable('kernel_3', shape=[3,2,2,16,4],
                                     dtype=tf.float32, initializer=initializer)
@@ -76,7 +78,7 @@ class Estimator():
         conv3 = tf.nn.bias_add(conv3, bias_3)
         conv3 = tf.nn.relu(conv3, name='relu_3')
 
-        """
+        # 2D implementation of conv layers
         conv1 = tf.contrib.layers.conv2d(
             X, num_outputs=32, kernel_size=3, stride=2, activation_fn=tf.nn.relu)
         conv2 = tf.contrib.layers.conv2d(
@@ -84,11 +86,11 @@ class Estimator():
         conv3 = tf.contrib.layers.conv2d(
             conv2, 8, 2, 1, activation_fn=tf.nn.relu)
         """
-        flattened = tf.contrib.layers.flatten(conv3)
+        flattened = tf.contrib.layers.flatten(conv2)
         # Fully connected layers with RELU
         fc1 = tf.contrib.layers.fully_connected(flattened, 128)
-        fc2 = tf.contrib.layers.fully_connected(flattened, 64)
-        self.predictions = tf.contrib.layers.fully_connected(fc2, self.a_dim, activation_fn=None)
+        #fc2 = tf.contrib.layers.fully_connected(flattened, 128)
+        self.predictions = tf.contrib.layers.fully_connected(fc1, self.a_dim, activation_fn=None)
         self.action_predictions = tf.gather(tf.reshape(self.predictions, [-1]), self.actions_pl)
 
 

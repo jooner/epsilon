@@ -178,11 +178,11 @@ def deep_q_learning(sess,
 
         # Reset the environment
         state = env.reset()
-        dream = env
+        #dream = env
         loss = None
         # Monte Carlo Tree Search
         # step 1: make a new tree every new episode
-        world_tree = MCTSWorldTree(dream.get_state(), dream.get_reward())
+        #world_tree = MCTSWorldTree(dream.get_state(), dream.get_reward())
         # One step in the environment
 
         for t in itertools.count():
@@ -255,19 +255,7 @@ def deep_q_learning(sess,
             # Perform gradient descent update
             states_batch = np.array(states_batch)
             loss = q_estimator.update(sess, states_batch, action_batch, targets_batch)
-            """
-            if t % 400 == 0:
-                print "q_values_next"
-                print q_values_next
-                print best_actions
-                print "q_values_next_target"
-                #print q_values_next_target
-                #print next_states_batch
-                print "target_batch"
-                print targets_batch
-                print states_batch
-                print "LOSS %f" %loss
-            """
+
             if done:
                 break
 
