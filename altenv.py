@@ -13,6 +13,7 @@ class Environment(object):
         self.building = building
         self.global_time_list = []
         self.old_state = np.zeros((NUM_ELEVATORS * 3 + 2, NUM_FLOORS, NUM_FLOORS))
+        self.old_old_state = np.zeros((NUM_ELEVATORS * 3 + 2, NUM_FLOORS, NUM_FLOORS))
         self.populate()
         # 0.2 arrivals per sec over 7200 secs (2 hrs)
         #self.population_plan = np.random.poisson(0.2, TOTAL_SEC)
@@ -79,10 +80,11 @@ class Environment(object):
             for destination, passenger_list in elevator.dict_passengers.iteritems():
                 state[3*j+3, elevator.curr_floor, destination] += len(passenger_list)
                 state[3*j+4, elevator.curr_floor, destination] += sum([p.time for p in passenger_list])
-        concat_state = np.concatenate((self.old_state[...,np.newaxis], state[...,np.newaxis]), axis=3)
+        concat_state = np.concatenate((self.old_old_state[...,np.newaxis], self.old_state[...,np.newaxis]), axis=3)
+        self.old_old_state = self.old_state
+        concat_state = np.concatenate((concat_state, state[...,np.newaxis]), axis=3)
         self.old_state = state
         return concat_state
-
 
     def populate(self):
         """Populate passenger objects. Hard Code the numbers. yay.
@@ -94,8 +96,14 @@ class Environment(object):
 #        self.state[2, 0, 0] += 1
 #        self.state[3, 1, 0] += 1
 
-        start_dest_pairs = [(0,2), (0,1), (2,0), (3,1), (2,3)]
-
+        #start_dest_pairs = [(0,2), (0,1), (2,0), (3,1), (2,3)]
+        start_dest_pairs = []
+        for i in xrange(5):
+            s = np.random.randint(4)
+            d = np.random.randint(4)
+            if s == d:
+                d = (d + 1) % 4
+            start_dest_pairs.append((s, d))
         self.curr_pop += 5
         self.total_pop += 5
 
