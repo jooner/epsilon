@@ -12,7 +12,7 @@ class Environment(object):
         self.curr_pop = 0
         self.building = building
         self.global_time_list = []
-        self.old_state = np.zeros((NUM_FLOORS, NUM_FLOORS, NUM_ELEVATORS * 2 + 2))
+        self.old_state = np.zeros((NUM_ELEVATORS * 3 + 2, NUM_FLOORS, NUM_FLOORS))
         self.populate()
         # 0.2 arrivals per sec over 7200 secs (2 hrs)
         #self.population_plan = np.random.poisson(0.2, TOTAL_SEC)
@@ -68,17 +68,18 @@ class Environment(object):
         return reward / float(1e5)
 
     def get_state(self):
-        state = np.zeros((NUM_FLOORS, NUM_FLOORS, NUM_ELEVATORS * 2 + 2))
-        for i, floor in enumerate(self.building.floors):
+        state = np.zeros((NUM_ELEVATORS * 3 + 2, NUM_FLOORS, NUM_FLOORS))
+        for floor in self.building.floors:
             for passenger in floor.passenger_list:
-                state[floor.value, passenger.destination, 0] += 1
+                state[0, floor.value, passenger.destination] += 1
             for passenger in floor.passenger_list:
-                state[floor.value, passenger.destination, 1] += passenger.time
+                state[1, floor.value, passenger.destination] += passenger.time
         for j, elevator in enumerate(self.building.elevators):
+            state[3*j+2, elevator.curr_floor, :] = [1] * NUM_FLOORS # note where the elevator is
             for destination, passenger_list in elevator.dict_passengers.iteritems():
-                state[elevator.curr_floor, destination, 2*j+2] += len(passenger_list)
-                state[elevator.curr_floor, destination, 2*j+3] += sum([p.time for p in passenger_list])
-        concat_state = np.concatenate((self.old_state, state), axis=2)
+                state[3*j+3, elevator.curr_floor, destination] += len(passenger_list)
+                state[3*j+4, elevator.curr_floor, destination] += sum([p.time for p in passenger_list])
+        concat_state = np.concatenate((self.old_state[...,np.newaxis], state[...,np.newaxis]), axis=3)
         self.old_state = state
         return concat_state
 
