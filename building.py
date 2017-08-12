@@ -121,4 +121,4 @@ class Elevator(object):
 
         # Update the cost
         for passengers in self.dict_passengers.values():
-            self.cumulative_cost += sum([(p.time ** 2) for p in passengers])
+            self.cumulative_cost = sum([(p.time ** 2) for p in passengers])

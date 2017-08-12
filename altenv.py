@@ -51,8 +51,8 @@ class Environment(object):
                 flr = self.building.elevators[i].curr_floor
                 k = len(self.global_time_list)
                 self.global_time_list.extend(self.building.elevators[i].unload(self.building.floors[flr]))
-                if k != len(self.global_time_list):
-                    print self.global_time_list
+                #if k != len(self.global_time_list):
+                #    print self.global_time_list
                 self.building.floors[flr] = self.building.elevators[i].load(self.building.floors[flr])
 
             #print elevator_action
@@ -67,9 +67,9 @@ class Environment(object):
         return (self.time > TOTAL_SEC)
 
     def get_reward(self):
-        reward = -sum([e.cumulative_cost for e in self.building.elevators])
-        reward -= sum([f.get_cost() for f in self.building.floors])
-        return reward / float(1e5)
+        cost = sum([e.cumulative_cost for e in self.building.elevators])
+        cost += sum([f.get_cost() for f in self.building.floors])
+        return -cost / float(1e4)
 
     def get_state(self):
         state = np.zeros((NUM_ELEVATORS * 3 + 2, NUM_FLOORS, NUM_FLOORS))
