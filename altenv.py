@@ -63,7 +63,7 @@ class Environment(object):
         return (self.get_state(), self.get_reward(), self.is_done())
 
     def is_done(self):
-        return (self.time > TOTAL_SEC)
+        return self.time > TOTAL_SEC or (self.old_state == self.old_old_state).all()
 
     def get_reward(self):
         # passenger wait time cost
@@ -71,7 +71,7 @@ class Environment(object):
         p_cost2 = sum([f.get_cost() for f in self.building.floors])
         # elevator movement amount cost
         e_cost = sum([e.movement for e in self.building.elevators])
-        reward = -(p_cost1 + p_cost2 + e_cost)
+        reward = -(0.7*(p_cost1 + p_cost2) + 0.3 * e_cost)
         #print(p_cost1, p_cost2, e_cost, reward)
         return reward
 

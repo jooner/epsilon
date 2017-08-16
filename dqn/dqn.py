@@ -90,7 +90,7 @@ class Estimator():
         # Fully connected layers with RELU
         fc1 = tf.contrib.layers.fully_connected(flattened, 128)
         #fc2 = tf.contrib.layers.fully_connected(flattened, 128)
-        self.predictions = tf.contrib.layers.fully_connected(fc1, self.a_dim)
+        self.predictions = tf.contrib.layers.fully_connected(fc1, self.a_dim, activation_fn=None)
         self.action_predictions = tf.gather(tf.reshape(self.predictions, [-1]), self.actions_pl)
 
 
