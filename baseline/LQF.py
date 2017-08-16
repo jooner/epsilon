@@ -78,15 +78,17 @@ def lqf_run(epoch=1):
         #print "---------------------%d"%i
         lqf_env.get_state()
         episode_reward = 0
+        counter = 0
         while not lqf_env.is_done():
             #print lqf_env.total_pop
             action = lqf_controller(lqf_env)
             s, r, _ = lqf_env.step(action)
             episode_reward += r
+            counter += 1
             #print "action = %s \t reward = %f"%(action, r)
         #scores.append(lqf_env.get_reward())
         lqf_env.update_global_time_list()
-        rewards.append(episode_reward)
+        rewards.append(episode_reward / float(counter))
         avg_time = sum(lqf_env.global_time_list) / float(lqf_env.total_pop)
         result += avg_time
     return result / float(epoch), float(sum(rewards)) / len(rewards)

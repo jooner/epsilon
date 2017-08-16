@@ -32,7 +32,7 @@ class Floor(object):
                 pass
 
     def get_cost(self):
-        return sum([(p.time**2) for p in self.passenger_list])
+        return sum([p.time for p in self.passenger_list])
 
 class Elevator(object):
     def __init__(self):
@@ -46,6 +46,7 @@ class Elevator(object):
         self.curr_capacity = 0
         # total cost incurred so far
         self.cumulative_cost = 0
+        self.movement = 0
 
     def move(self, action):
         if action == 0:
@@ -53,9 +54,11 @@ class Elevator(object):
         elif action == 1:
             if self.move_direction != -1:
                 self.move_direction = action
+                self.movement += 1
         elif action == -1:
             if self.move_direction != 1:
                 self.move_direction = action
+                self.movement += 1
         else:
             raise ValueError("action value should be one of 0, 1, -1")
 
@@ -78,7 +81,6 @@ class Elevator(object):
                         self.dict_passengers[p.destination].append(p)
                     del_list.append(i)
                     self.curr_capacity += 1
-                    self.cumulative_cost += p.time ** 2
             temp = []
             for i in xrange(len(floor.passenger_list)):
                 if i not in del_list:
@@ -97,7 +99,6 @@ class Elevator(object):
         if floor.value in self.dict_passengers.keys():
             for p in self.dict_passengers[floor.value]:
                 # reward when unloading person
-                self.cumulative_cost -= p.time ** 2
                 self.curr_capacity -= 1
                 total_time.append(p.time)
             self.dict_passengers.pop(floor.value, None)
@@ -120,5 +121,7 @@ class Elevator(object):
                 self.curr_floor -= 1
 
         # Update the cost
-        for passengers in self.dict_passengers.values():
-            self.cumulative_cost = sum([(p.time ** 2) for p in passengers])
+        cum_cost = 0
+        for _, passengers in self.dict_passengers.iteritems():
+            cum_cost += sum([p.time for p in passengers])
+        self.cumulative_cost = cum_cost

@@ -60,16 +60,20 @@ class Environment(object):
             self.building.elevators[i].update()
         self.tic() # progress global time by t += 1
 
-
         return (self.get_state(), self.get_reward(), self.is_done())
 
     def is_done(self):
         return (self.time > TOTAL_SEC)
 
     def get_reward(self):
-        cost = sum([e.cumulative_cost for e in self.building.elevators])
-        cost += sum([f.get_cost() for f in self.building.floors])
-        return -cost / float(1e4)
+        # passenger wait time cost
+        p_cost1 = sum([e.cumulative_cost for e in self.building.elevators])
+        p_cost2 = sum([f.get_cost() for f in self.building.floors])
+        # elevator movement amount cost
+        e_cost = sum([e.movement for e in self.building.elevators])
+        reward = -(p_cost1 + p_cost2 + e_cost)
+        #print(p_cost1, p_cost2, e_cost, reward)
+        return reward
 
     def get_state(self):
         state = np.zeros((NUM_ELEVATORS * 3 + 2, NUM_FLOORS, NUM_FLOORS))
@@ -116,7 +120,6 @@ class Environment(object):
             passenger.destination = pair[1]
             self.building.floors[passenger.start_floor].passenger_list.append(passenger)
             self.building.floors[passenger.start_floor].update_call()
-
 
     def update_global_time_list(self):
         # TODO: make this faster by removing nested for loop

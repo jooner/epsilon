@@ -68,16 +68,16 @@ class Estimator():
         conv2 = tf.nn.conv3d(pool1, filter=kernel_2, strides=[1,1,1,1,1], padding='SAME')
         conv2 = tf.nn.bias_add(conv2, bias_2)
         conv2 = tf.nn.relu(conv2, name='relu_2')
-        # pool2 = tf.nn.max_pool3d(conv2, ksize=[1,2,2,2,1], strides=[1,2,2,2,1], padding='SAME')
-        """
+        pool2 = tf.nn.max_pool3d(conv2, ksize=[1,2,2,2,1], strides=[1,2,2,2,1], padding='SAME')
+
         # 3rd conv layer
-        kernel_3 = tf.get_variable('kernel_3', shape=[3,2,2,16,4],
+        kernel_3 = tf.get_variable('kernel_3', shape=[3,2,2,8,4],
                                     dtype=tf.float32, initializer=initializer)
         bias_3 = tf.get_variable('bias_3', shape=[4], dtype=tf.float32, initializer=initializer)
         conv3 = tf.nn.conv3d(pool2, filter=kernel_3, strides=[1,1,1,1,1], padding='SAME')
         conv3 = tf.nn.bias_add(conv3, bias_3)
         conv3 = tf.nn.relu(conv3, name='relu_3')
-
+        """
         # 2D implementation of conv layers
         conv1 = tf.contrib.layers.conv2d(
             X, num_outputs=64, kernel_size=3, stride=2, activation_fn=tf.nn.relu)
@@ -86,7 +86,7 @@ class Estimator():
         conv3 = tf.contrib.layers.conv2d(
             conv2, 8, 2, 1, activation_fn=tf.nn.relu)
         """
-        flattened = tf.contrib.layers.flatten(conv2)
+        flattened = tf.contrib.layers.flatten(conv3)
         # Fully connected layers with RELU
         fc1 = tf.contrib.layers.fully_connected(flattened, 128)
         #fc2 = tf.contrib.layers.fully_connected(flattened, 128)
