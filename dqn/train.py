@@ -182,7 +182,7 @@ def deep_q_learning(sess,
         loss = None
         # Monte Carlo Tree Search
         # step 1: make a new tree every new episode
-        #world_tree = MCTSWorldTree(dream.get_state(), dream.get_reward())
+        # world_tree = MCTSWorldTree(dream.get_state(), dream.get_reward())
         # One step in the environment
 
         for t in itertools.count():
@@ -268,7 +268,7 @@ def deep_q_learning(sess,
 
         # Add summaries to tensorboard
         episode_summary = tf.Summary()
-        episode_summary.value.add(simple_value=stats.episode_rewards[i_episode], node_name="episode_reward", tag="episode_reward")
+        episode_summary.value.add(simple_value=stats.episode_rewards[i_episode]/float(stats.episode_lengths[i_episode]), node_name="episode_reward", tag="episode_reward")
         episode_summary.value.add(simple_value=stats.episode_lengths[i_episode], node_name="episode_length", tag="episode_length")
         episode_summary.value.add(simple_value=stats.episode_avg_wait[i_episode], node_name="episode_avg_wait", tag="episode_avg_wait")
         q_estimator.summary_writer.add_summary(episode_summary, total_t)
@@ -276,7 +276,7 @@ def deep_q_learning(sess,
 
         yield total_t, i_episode, EpisodeStats(
             episode_lengths=stats.episode_lengths[:i_episode+1],
-            episode_rewards=stats.episode_rewards[:i_episode+1],
+            episode_rewards=stats.episode_rewards[:i_episode+1]/float(stats.episode_lengths[i_episode]),
             episode_avg_wait=stats.episode_avg_wait[:i_episode+1])
 
     return
