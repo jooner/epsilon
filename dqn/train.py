@@ -276,7 +276,7 @@ def deep_q_learning(sess,
 
         yield total_t, i_episode, EpisodeStats(
             episode_lengths=stats.episode_lengths[:i_episode+1],
-            episode_rewards=stats.episode_rewards[:i_episode+1]/float(stats.episode_lengths[i_episode]),
+            episode_rewards=stats.episode_rewards[:i_episode+1]/float(stats.episode_lengths[:i_episode+1]),
             episode_avg_wait=stats.episode_avg_wait[:i_episode+1])
 
     return

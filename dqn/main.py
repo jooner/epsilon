@@ -41,7 +41,7 @@ with tf.Session() as sess:
                                             epsilon_start=1.0,
                                             epsilon_end=0.1,
                                             epsilon_decay_steps=100000,
-                                            discount_factor=0.8,
+                                            discount_factor=0.999,
                                             batch_size=16):
 
         print "Episode {}\t  Reward: {}\t Episode AvgWaitTime: {}".format(num_ep, stats.episode_rewards[-1], stats.episode_avg_wait[-1])
