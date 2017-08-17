@@ -1,6 +1,5 @@
 from dqn import *
 from collections import namedtuple
-from epsilon.mcts_env import MCTSWorldTree
 
 VALID_ACTIONS = [-1, 0, 1]
 
@@ -178,13 +177,13 @@ def deep_q_learning(sess,
 
         # Reset the environment
         state = env.reset()
-        #dream = env
+        dream = env
         loss = None
-        # Monte Carlo Tree Search
-        # step 1: make a new tree every new episode
-        # world_tree = MCTSWorldTree(dream.get_state(), dream.get_reward())
-        # One step in the environment
-
+        """
+        # NOTE create an Monte Carlo Tree
+        mcstate = MCState(state, reward, env)
+        mcts = MCTS(tree_policy=UCB1, default_policy=immediate_reward, backup=monte_carlo)
+        """
         for t in itertools.count():
 
             # Epsilon for this time step
@@ -205,18 +204,15 @@ def deep_q_learning(sess,
             #print "Step {} ({}) @ Episode {}/{}, loss: {}".format(t, total_t, i_episode + 1, num_episodes, loss)
             #sys.stdout.flush()
 
-            # MCTS step 2: from the current state, explore by unrolling actions
-            # we do this by hallucinating an action, by using perform
-            # which expands the tree nodes. s->a->s'& r
-            # MCTS step 3: MCTS returns action with highest reward from backtrack
-            # MCTS step 4:
-            #print world_tree.perform()
-
-
             # Take a step
             action_probs = policy(sess, state, epsilon)
             action = get_action(action_probs)
             next_state, reward, done = env.step(action)
+
+            # NOTE use tree policy to reach leaf node
+            # then expand from leaf node
+            # best_action = mcts(MCState.root)
+
             # If our replay memory is full, pop the first element
             if len(replay_memory) == replay_memory_size:
                 replay_memory.pop(0)
@@ -232,14 +228,7 @@ def deep_q_learning(sess,
             samples = random.sample(replay_memory, batch_size)
             states_batch, action_batch, reward_batch, next_states_batch, done_batch = map(np.array, zip(*samples))
 
-            """
-            action_batch += 1
-            indices = []
-            for b_idx in range(batch_size):
-                indices.append(sum([(NUM_VALID_ACTIONS ** (NUM_ELEVATORS-i-1)) * a \
-                               for i, a in enumerate(action_batch[b_idx])]))
-            action_batch = indices
-            """
+
             # convert action_batch in the form of indices from batch of vectors.
             action_batch = [action_vec2index(a) for a in action_batch]
 
@@ -276,7 +265,7 @@ def deep_q_learning(sess,
 
         yield total_t, i_episode, EpisodeStats(
             episode_lengths=stats.episode_lengths[:i_episode+1],
-            episode_rewards=stats.episode_rewards[:i_episode+1]/float(stats.episode_lengths[:i_episode+1]),
+            episode_rewards=stats.episode_rewards[:i_episode+1]/float(stats.episode_lengths[i_episode]),
             episode_avg_wait=stats.episode_avg_wait[:i_episode+1])
 
     return
